@@ -1,5 +1,0 @@
-ERROR|2018-05-29 15:40:00|70ck1eqxzuafqpga1gv5nuvo|/web/one/One/Facades/Facade.php:17|{"message":"","file":"\/web\/one\/One\/Database\/Mysql\/Connect.php","line":49,"code":0}
-ERROR|2018-05-29 15:41:29|70ck239qjvdetqe3bt38qepu|/web/one/One/Facades/Facade.php:17|{"message":"","file":"\/web\/one\/One\/Database\/Mysql\/Connect.php","line":49,"code":0}
-ERROR|2018-05-29 15:43:21|70ck2ycey5c1nd7m93rhtou9|/web/one/One/Facades/Facade.php:17|{"message":"","file":"\/web\/one\/One\/Database\/Mysql\/Connect.php","line":40,"code":0}
-ERROR|2018-05-29 15:45:17|70ck3ujyvhh1n3f2fbm9z74l|/web/one/One/Facades/Facade.php:17|{"message":"","file":"\/web\/one\/One\/Database\/Mysql\/Connect.php","line":40,"code":0}
-ERROR|2018-05-29 15:47:26|70ck4udbtr9iau1r2gme9mod|/web/one/One/Facades/Facade.php:17|{"message":"","file":"\/web\/one\/One\/Database\/Mysql\/Connect.php","line":40,"code":0}

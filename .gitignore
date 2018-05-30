@@ -1,4 +1,5 @@
 /vendor
+/App/RunCache
 .idea
 .svn
 .DS_Store
