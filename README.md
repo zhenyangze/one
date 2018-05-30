@@ -9,6 +9,11 @@ composer install
 
 ```
 
+## 目录说明
+
+ - App 应用目录
+ - One 框架目录
+
 ## 运行模式配置
 
 `App/config/app.php`
