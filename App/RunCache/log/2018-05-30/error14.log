@@ -1,0 +1,6 @@
+ERROR|2018-05-30 14:31:20|70d1nnc8gv9a78vibtt2glda|/web/one/One/Facades/Facade.php:17|{"message":"","file":"\/web\/one\/One\/Database\/Mysql\/Connect.php","line":42,"code":0}
+ERROR|2018-05-30 14:31:56|70d1nx7q0sn9p638b8pwodx2|/web/one/One/Facades/Facade.php:17|{"message":"","file":"\/web\/one\/One\/Database\/Mysql\/Connect.php","line":42,"code":0}
+ERROR|2018-05-30 14:32:22|70d1o4gk9xwyuj78127rss4q|/web/one/One/Facades/Facade.php:17|{"message":"","file":"\/web\/one\/One\/Database\/Mysql\/Connect.php","line":42,"code":0}
+ERROR|2018-05-30 14:32:41|70d1o9pc5qvx48fo7xsi5l70|/web/one/One/Facades/Facade.php:17|{"message":"","file":"\/web\/one\/One\/Database\/Mysql\/Connect.php","line":42,"code":0}
+ERROR|2018-05-30 14:34:38|70d1p634nfna0zbd3vrrsxgg|/web/one/One/Facades/Facade.php:17|{"message":"","file":"\/web\/one\/One\/Database\/Mysql\/Connect.php","line":42,"code":0}
+ERROR|2018-05-30 14:35:39|70d1pn0cdyq16dzqn6ebue6k|/web/one/One/Facades/Facade.php:17|{"message":"","file":"\/web\/one\/One\/Database\/Mysql\/Connect.php","line":42,"code":0}
