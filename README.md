@@ -1,6 +1,14 @@
 # one 
 是一个兼容fpm和swoole两种运行模式的php迷你框架
 
+## 安装
+```
+git clone git@github.com:lizhichao/one.git
+cd one
+composer install
+
+```
+
 ## 运行模式配置
 
 `App/config/app.php`
