@@ -6,7 +6,7 @@
  */
 function alert($msg, $code)
 {
-    throw new \One\Exceptions\HttpException($msg,$code);
+    throw new \One\Exceptions\HttpException($msg, $code);
 }
 
 /**
@@ -126,3 +126,25 @@ function filterXss($str, $allow_tags = null)
     }
     return $str;
 }
+
+
+/**
+ * @param $str
+ * @param array $data
+ * @return string
+ */
+function router($str, $data = [])
+{
+    $url = array_get(\One\Router::$as_info, $str);
+    if ($data) {
+        $key = array_map(function ($v) {
+            return '{' . $v . '}';
+        }, array_keys($data));
+        $data = array_map(function ($v) {
+            return urlencode($v);
+        }, $data);
+        $url = str_replace($key, array_values($data), $url);
+    }
+    return $url;
+}
+

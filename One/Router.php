@@ -205,7 +205,7 @@ class Router
     private $max_group_depth = 200;
 
     /**
-     * @param array $rule ['prefix' => '','namespace'=>'','cache'=>['time'=>1,'call'=>''],'middle'=>[]]
+     * @param array $rule ['prefix' => '','namespace'=>'','cache'=>1,'middle'=>[]]
      * @param \Closure $route
      */
     public function group($rule, $route)

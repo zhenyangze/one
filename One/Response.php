@@ -97,27 +97,6 @@ class Response
     }
 
     /**
-     * @param $str
-     * @param array $data
-     * @param bool $csrf
-     * @return string
-     */
-    public function getUrl($str, $data = [])
-    {
-        $url = array_get(Router::$as_info, $str);
-        if ($data) {
-            $key = array_map(function ($v) {
-                return '{' . $v . '}';
-            }, array_keys($data));
-            $data = array_map(function ($v) {
-                return urlencode($v);
-            }, $data);
-            $url = str_replace($key, array_values($data), $url);
-        }
-        return $url;
-    }
-
-    /**
      * @param string $tpl
      * @param array $data
      */

@@ -8,13 +8,15 @@ class User extends Model
 {
     CONST TABLE = 'users';
 
+    protected $cache_time = 100;
+
     public function events()
     {
         return [
             'afterFind' => function ($ret) {
 
             },
-            'beforeFind' => function ($a) {
+            'beforeFind' => function (& $a) {
 
             }
         ];
