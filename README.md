@@ -44,7 +44,7 @@ use One\Facades\Router;
 //直接调用一个方法
 Router::get('/test',\App\Controllers\IndexController::class.'@test');
 
-//设置一个别名
+//设置一个别名 {id} 匹配数组
 Router::get('/user/{id}',[
     'use' => \App\Controllers\IndexController::class.'@user',
     'as' => 'user'
@@ -52,6 +52,12 @@ Router::get('/user/{id}',[
 
 //返回 /user/100
 router('user',['id' => 100]);
+
+//{xxx}通配符
+Router::get('/user/{name}','User@getUserInfoByName);
+
+//正则表达式匹配 ^\w{2,4}$
+Router::get('/user/`^\w{2,4}$`','User@getUserInfoByVipName');
 
 
 ```
