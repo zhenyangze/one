@@ -10,7 +10,7 @@ class IndexController extends Controller
 {
     public function index()
     {
-        return $this->json(User::find(123));
+        return $this->json(User::cache(0)->find(123));
     }
 
     public function test()
