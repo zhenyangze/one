@@ -28,7 +28,10 @@ return [
 ```
 
 - apache/nginx 运行模式配置更目录指向到 `App/public` 重定向到 `index.php`
-- swoole 运行`php App/swoole.php`
+- swoole 
+    - 开始 `php App/swoole.php`
+    - 重启 `kill -USR1 主进程PID`
+    - 停止 `kill 主进程PID`
 
 ## 路由
 

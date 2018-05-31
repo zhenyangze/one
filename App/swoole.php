@@ -25,6 +25,11 @@ require_once _APP_PATH_.'/config.php';
 
 $http = new swoole_http_server("127.0.0.1", 9501);
 
+$http->set([
+    'daemonize' => 1,
+    'log_file' => config('log.path').'swoole.log'
+]);
+
 $http->on("start", function ($server) {
     echo "Swoole http server is started at http://127.0.0.1:9501\n";
 });
