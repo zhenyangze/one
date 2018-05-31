@@ -9,8 +9,13 @@ class Response extends \One\Response
     public function header($key, $val, $replace = true, $code = null)
     {
         Swoole::$response->header($key, $val, $replace);
-        if($code){
-            Swoole::$response->status(302);
+        if ($code) {
+            $this->code($code);
         }
+    }
+
+    public function code($code)
+    {
+        Swoole::$response->status($code);
     }
 }

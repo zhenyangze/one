@@ -40,7 +40,7 @@ class Response
 
     public function json($data, $callback = null)
     {
-        $this->header('Content-type','application/json');
+        $this->header('Content-type', 'application/json');
         $this->result['res'] = $data;
         if ($callback) {
             return $callback . '(' . json_encode($data) . ')';
@@ -49,15 +49,32 @@ class Response
         }
     }
 
-    public function header($key,$val,$replace = true,$code = null)
+    public function header($key, $val, $replace = true, $code = null)
     {
-        header($key.':'.$val,$replace,$code);
+        header($key . ':' . $val, $replace, $code);
     }
+
+    public function code($code)
+    {
+        switch ($code) {
+            case 404:
+                header('HTTP/1.1 404 Not Found');
+                break;
+            case 403:
+                header('HTTP/1.1 403 Forbidden');
+                break;
+            case 401:
+                header('HTTP/1.1 401 Unauthorized');
+                break;
+        }
+
+    }
+
 
     private function result()
     {
         if (FacadeRequest::isAjax()) {
-            $this->header('Content-type','application/json');
+            $this->header('Content-type', 'application/json');
             return json_encode($this->result);
         } else {
             if (defined('_APP_PATH_VIEW_') === false) {
@@ -88,11 +105,11 @@ class Response
     public function redirect($url, $args = [])
     {
         if (isset($args['time'])) {
-            $this->header('Refresh' , $args['time'] . ';url=' . $url);
+            $this->header('Refresh', $args['time'] . ';url=' . $url);
         } else if (isset($args['httpCode'])) {
-            $this->header('Location' , $url, true, $args['httpCode']);
+            $this->header('Location', $url, true, $args['httpCode']);
         } else {
-            $this->header('Location' , $url, true, 302);
+            $this->header('Location', $url, true, 302);
         }
     }
 
