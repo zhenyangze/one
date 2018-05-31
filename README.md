@@ -1,5 +1,5 @@
 # one 
-是一个兼容fpm和swoole两种运行模式的php迷你框架
+是一个兼容apache/nginx和swoole两种运行模式的php迷你框架
 
 ## 安装
 ```
@@ -23,6 +23,9 @@ return [
 ];
 
 ```
+
+- apache/nginx 运行模式配置更目录指向到 `App/public` 重定向到 `index.php`
+- swoole 运行`php App/swoole.php`
 
 ## 路由
 
