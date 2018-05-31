@@ -4,6 +4,7 @@ namespace App\Exceptions;
 
 use One\Exceptions\HttpException;
 use One\Facades\Log;
+use One\Facades\Request;
 use One\Facades\Response;
 
 class Handler
@@ -18,7 +19,8 @@ class Handler
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
-                'code' => $e->getCode()
+                'code' => $e->getCode(),
+                'url' => Request::uri()
             ]);
             return Response::error('请求异常', 4000);
         }

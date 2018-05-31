@@ -49,7 +49,7 @@ class Response
         }
     }
 
-    protected function header($key,$val,$replace = true,$code = null)
+    public function header($key,$val,$replace = true,$code = null)
     {
         header($key.':'.$val,$replace,$code);
     }

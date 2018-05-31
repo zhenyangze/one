@@ -9,7 +9,6 @@ namespace One\Facades;
  * @method string json($data, $callback = null) static
  * @method string redirectMethod($m, $args = []) static
  * @method string redirect($url, $args = []) static
- * @method string getUrl($str, $data = []) static
  * @method string tpl($template, $data = []) static
  *
  */

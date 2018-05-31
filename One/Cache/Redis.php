@@ -40,7 +40,7 @@ class Redis extends Cache
         if ((!$val) && $closure) {
             $val = $closure();
             $this->set($key, $val, $ttl, $tags);
-        }else{
+        }else if($val){
             $val = unserialize($val);
         }
         return $val;
