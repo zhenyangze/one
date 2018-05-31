@@ -26,16 +26,33 @@ class CacheBuild extends Build
         if ($id) {
             $this->where($this->getPriKey(), $id);
         }
-        return unserialize(Cache::get($this->getCacheKey(), function () use ($id) {
-            return serialize(parent::find());
-        }, $this->cache_time, $this->cache_tag));
+        if($this->cache_time == 0){
+            return parent::find();
+        }
+        return Cache::get($this->getCacheKey(), function () {
+            return parent::find();
+        }, $this->cache_time, $this->cache_tag);
+    }
+
+    public function count()
+    {
+        if($this->cache_time == 0){
+            return parent::count();
+        }
+        $this->is_count = 1;
+        return Cache::get($this->getCacheKey(), function () {
+            return parent::count();
+        }, $this->cache_time, $this->cache_tag);
     }
 
     public function findAll()
     {
-        return unserialize(Cache::get($this->getCacheKey(':list'), function () {
-            return serialize(parent::findAll());
-        }, $this->cache_time, $this->cache_tag));
+        if($this->cache_time == 0){
+            return parent::findAll();
+        }
+        return Cache::get($this->getCacheKey(':list'), function () {
+            return parent::findAll();
+        }, $this->cache_time, $this->cache_tag);
     }
 
     public function update($data)

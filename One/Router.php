@@ -30,9 +30,8 @@ class Router
         $key = md5(__FILE__.filemtime(self::$conf['path']));
         $info = Cache::get($key, function () {
             require self::$conf['path'];
-            return json_encode([self::$info, self::$as_info]);
+            return [self::$info, self::$as_info];
         }, 60 * 60 * 24 * 30);
-        $info = json_decode($info, true);
         self::$info = $info[0];
         self::$as_info = $info[1];
     }

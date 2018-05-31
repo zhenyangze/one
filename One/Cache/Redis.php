@@ -37,9 +37,11 @@ class Redis extends Cache
     public function get($key, \Closure $closure = null, $ttl = 0, $tags = [])
     {
         $val = $this->driver->get($this->getTagKey($key, $tags));
-        if ((!$val || $ttl == 0) && $closure) {
+        if ((!$val) && $closure) {
             $val = $closure();
             $this->set($key, $val, $ttl, $tags);
+        }else{
+            $val = unserialize($val);
         }
         return $val;
     }
@@ -66,7 +68,7 @@ class Redis extends Cache
 
     public function set($key, $val, $ttl = 0, $tags = [])
     {
-        $this->driver->set($this->getTagKey($key, $tags), $val, $ttl);
+        $this->driver->set($this->getTagKey($key, $tags), serialize($val), $ttl);
     }
 
 

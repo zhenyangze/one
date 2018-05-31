@@ -25,9 +25,9 @@ trait StructTrait
                         $fields[$v['Field']] = 1;
                     }
                 }
-                return json_encode(['field' => $fields, 'pri' => $pri]);
+                return ['field' => $fields, 'pri' => $pri];
             }, 60 * 60 * 24);
-            self::$struct[$this->from] = json_decode($str,true);
+            self::$struct[$this->from] = $str;
         }
         return self::$struct[$this->from];
     }

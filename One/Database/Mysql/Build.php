@@ -86,7 +86,7 @@ class Build
         return $this->fillSelectWith($res, 'setRelationList');
     }
 
-    private $is_count = 0;
+    protected $is_count = 0;
 
     /**
      * @return int
@@ -322,8 +322,12 @@ class Build
         $build = [];
         $this->filter($data);
         foreach ($data as $k => $v) {
-            $sql .= "{$k}=?,";
-            $build[] = $v;
+            if(is_numeric($k)){
+                $sql .= "{$v[0]}={$v[1]}";
+            }else{
+                $sql .= "{$k}=?,";
+                $build[] = $v;
+            }
         }
         $sql = substr($sql, 0, -1);
         $this->setPriWhere();
