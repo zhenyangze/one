@@ -8,10 +8,23 @@ class File extends Cache
 {
     use ConfigTrait;
 
-    public function __construct()
+    private $child_dir = '';
+
+    public function __construct($dir = '')
     {
-        if (!is_dir(self::$conf['path'])) {
-            mkdir(self::$conf['path'], 0755, true);
+        $this->child_dir = $dir;
+        $this->mkdir();
+    }
+
+    private function mkdir()
+    {
+        if($this->child_dir){
+            $dir = self::$conf['path'] . '/' . $this->child_dir;
+        }else{
+            $dir = self::$conf['path'];
+        }
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
         }
     }
 
@@ -19,7 +32,7 @@ class File extends Cache
     {
         $k = $this->getTagKey($key, $tags);
         $f = $this->getFileName($k);
-        if(file_exists($f)){
+        if (file_exists($f)) {
             $str = file_get_contents($f);
             if ($str) {
                 $time = substr($str, 0, 10);
@@ -62,16 +75,20 @@ class File extends Cache
     {
         if (is_array($key)) {
             foreach ($key as $k) {
-                unlink($this->getFileName($k));
+                @unlink($this->getFileName($k));
             }
         } else {
-            return unlink($this->getFileName(self::$conf['prefix'].$key));
+            return @unlink($this->getFileName(self::$conf['prefix'] . $key));
         }
     }
 
     private function getFileName($key)
     {
-        return self::$conf['path'] . '/' . $key;
+        if ($this->child_dir) {
+            return self::$conf['path'] . '/' . $this->child_dir . '/' . $key;
+        } else {
+            return self::$conf['path'] . '/' . $key;
+        }
     }
 
 }

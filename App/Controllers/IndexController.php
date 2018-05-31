@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Model\User;
 use One\Controller;
+use One\Facades\Session;
 
 class IndexController extends Controller
 {
@@ -14,7 +15,14 @@ class IndexController extends Controller
 
     public function test()
     {
-        return memory_get_usage();
+        $a = Session::get('aa');
+        if($a){
+            $a++;
+        }else{
+            $a=1;
+        }
+        Session::set('aa',$a);
+        return $a;
     }
 
 }
