@@ -18,6 +18,8 @@ class Session
 
     private $drive;
 
+    private $prefix = 'session_';
+
     public function __construct()
     {
         $this->name = config('session.name');
@@ -33,12 +35,12 @@ class Session
         if (config('session.drive') == 'redis') {
             $this->drive = new Redis();
         } else {
-            $this->drive = new File('session');
+            $this->drive = new File();
         }
 
         Swoole::$response->cookie($this->name, $this->session_id, time() + $this->time);
 
-        $this->data = $this->drive->get($this->session_id);
+        $this->data = $this->drive->get($this->prefix.$this->session_id);
     }
 
     public function set($key, $val)
@@ -57,7 +59,7 @@ class Session
 
     public function __destruct()
     {
-        $this->drive->set($this->session_id, $this->data, $this->time);
+        $this->drive->set($this->prefix.$this->session_id, $this->data, $this->time);
     }
 
 }

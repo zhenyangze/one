@@ -8,23 +8,15 @@ class File extends Cache
 {
     use ConfigTrait;
 
-    private $child_dir = '';
-
-    public function __construct($dir = '')
+    public function __construct()
     {
-        $this->child_dir = $dir;
         $this->mkdir();
     }
 
     private function mkdir()
     {
-        if($this->child_dir){
-            $dir = self::$conf['path'] . '/' . $this->child_dir;
-        }else{
-            $dir = self::$conf['path'];
-        }
-        if (!is_dir($dir)) {
-            mkdir($dir, 0755, true);
+        if (!is_dir(self::$conf['path'])) {
+            mkdir(self::$conf['path'], 0755, true);
         }
     }
 
@@ -84,11 +76,7 @@ class File extends Cache
 
     private function getFileName($key)
     {
-        if ($this->child_dir) {
-            return self::$conf['path'] . '/' . $this->child_dir . '/' . $key;
-        } else {
-            return self::$conf['path'] . '/' . $key;
-        }
+        return self::$conf['path'] . '/' . $key;
     }
 
 }
