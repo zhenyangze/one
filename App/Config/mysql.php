@@ -2,7 +2,7 @@
 
 return [
     'default' => [
-        'dns' => 'mysql:host=127.0.0.1;dbname=test',
+        'dns' => 'mysql:host=127.0.0.1;dbname=lysy',
         'username' => 'root',
         'password' => '123456',
         'ops' => [

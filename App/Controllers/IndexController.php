@@ -10,7 +10,8 @@ class IndexController extends Controller
 {
     public function index()
     {
-        return $this->json(User::cache(0)->find(123));
+        $user = User::whereIn('user_id',[22,32,44,55])->with('teamMembers.team')->findAll();
+        return $this->json($user);
     }
 
     public function test()
