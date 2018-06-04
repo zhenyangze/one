@@ -52,7 +52,7 @@ class Request
      */
     public function userAgent()
     {
-        return $this->server('HTTP_USER_AGENT');
+        return $this->server('http_user_agent');
     }
 
     /**
@@ -139,7 +139,7 @@ class Request
      */
     public function input()
     {
-        return file_get_contents('php://input');
+        return Swoole::$request->rawContent;
     }
 
     /**
