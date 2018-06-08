@@ -19,12 +19,16 @@ trait WhereTrait
      */
     public function where($key, $operator = null, $val = null, $link = ' and ')
     {
-        if ($key instanceof \Closure) {
+        if (is_array($key)) {
+            foreach ($key as $k => $v) {
+                $this->where[] = [$k, '=', $v, $link];
+            }
+        } else if ($key instanceof \Closure) {
             $this->where[] = [null, '(', null, $link];
             $key($this);
             $this->where[] = [null, ')'];
         } else {
-            if($val === null){
+            if ($val === null) {
                 $val = $operator;
                 $operator = '=';
             }

@@ -1,5 +1,5 @@
 <?php
 
 return [
-    'run_mode' => 'swoole' // swoole | fpm
+    'run_mode' => 'fpm' // swoole | fpm
 ];

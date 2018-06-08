@@ -8,7 +8,9 @@ class User extends Model
 {
     CONST TABLE = 'users';
 
-    protected $cache_time = 100;
+    protected $_cache_time = 100;
+
+    protected $_cache_column = ['user_id'];
 
     public function events()
     {

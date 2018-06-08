@@ -12,9 +12,8 @@ class IndexController extends Controller
     {
         $user = User::find(22);
         $user->teamMembers;
-        $user->teamMembers;
-        $user->teamMembers;
         return $this->json($user);
+//        return User::where('user_id',22)->update(['nickname' => 'nickname22']);
     }
 
     public function test()
