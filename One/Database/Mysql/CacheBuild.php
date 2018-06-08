@@ -26,7 +26,7 @@ class CacheBuild extends Build
         if ($id) {
             $this->where($this->getPriKey(), $id);
         }
-        if($this->cache_time == 0){
+        if ($this->cache_time == 0) {
             return parent::find();
         }
         return Cache::get($this->getCacheKey(), function () {
@@ -36,7 +36,7 @@ class CacheBuild extends Build
 
     public function count()
     {
-        if($this->cache_time == 0){
+        if ($this->cache_time == 0) {
             return parent::count();
         }
         $this->is_count = 1;
@@ -47,10 +47,10 @@ class CacheBuild extends Build
 
     public function findAll()
     {
-        if($this->cache_time == 0){
+        if ($this->cache_time == 0) {
             return parent::findAll();
         }
-        return Cache::get($this->getCacheKey(':list'), function () {
+        return Cache::get($this->getCacheKey(), function () {
             return parent::findAll();
         }, $this->cache_time, $this->cache_tag);
     }
@@ -58,7 +58,7 @@ class CacheBuild extends Build
     public function update($data)
     {
         $ret = parent::update($data);
-        $this->flushCache();
+        $this->flushCache($data);
         return $ret;
     }
 
@@ -72,27 +72,62 @@ class CacheBuild extends Build
     public function insert($data, $is_mulit = false)
     {
         $ret = parent::insert($data, $is_mulit);
-        $this->flushCache(':list');
+        $this->flushCache([$this->getPriKey() => $ret] + $data);
         return $ret;
     }
 
     public function join($table, $first, $second = null, $type = 'inner')
     {
-        $this->cache_tag[] = 'join:'.$table;
+        $this->cache_tag[] = 'join:' . $table;
         return parent::join($table, $first, $second, $type);
     }
 
-    private function getCacheKey($tag = '')
+
+    private $columns = [];
+
+    public function cacheColumn($columns)
     {
-        $table = $this->from;
-        $hash =sha1($this->getSelectSql() . json_encode($this->build));
-        return "DB:{$table}{$tag}:$hash";
+        sort($columns, SORT_STRING);
+        $this->columns = $columns;
     }
 
-    private function flushCache($tag = '')
+    private function getCacheColumnValue($data = [])
+    {
+        if ($this->columns) {
+            $w = [];
+            foreach ($this->where as $v) {
+                if ($v[1] == '=') {
+                    $w[$v[0]] = $v[2];
+                }
+            }
+            $data = $data + $w;
+
+            $keys = [];
+            foreach ($this->columns as $f) {
+                if(isset($data[$f])){
+                    $keys[] = $f.'_'.$data[$f];
+                }
+            }
+            if($keys){
+                return '-'.implode(':',$keys);
+            }
+        }
+        return '';
+    }
+
+    private function getCacheKey()
     {
         $table = $this->from;
-        Cache::delRegex("*:{$table}{$tag}:*");
-        Cache::flush('join:'.$table);
+        $key = $this->getCacheColumnValue();
+        $hash = sha1($this->getSelectSql() . json_encode($this->build));
+        return "DB:{$table}{$key}:$hash";
+    }
+
+    private function flushCache($data = [])
+    {
+        $table = $this->from;
+        $key = $this->getCacheColumnValue($data);
+        Cache::delRegex("*:{$table}{$key}:*");
+        Cache::flush('join:' . $table);
     }
 }

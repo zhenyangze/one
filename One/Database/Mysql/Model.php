@@ -12,23 +12,28 @@ class Model extends ArrayModel
 {
     use RelationTrait;
 
-    protected $connection = 'default';
+    protected $_connection = 'default';
 
-    protected $cache_time = 600;
+    protected $_cache_time = 600;
+
+    protected $_cache_column = [];
 
     CONST TABLE = '';
 
-    private $build = null;
+    private $_build = null;
 
     private function build()
     {
-        if (!$this->build) {
-            $this->build = new EventBuild($this->connection, $this, get_called_class(), static::TABLE);
+        if (!$this->_build) {
+            $this->_build = new EventBuild($this->_connection, $this, get_called_class(), static::TABLE);
         }
-        if ($this->cache_time > 0) {
-            $this->build->cache($this->cache_time);
+        if ($this->_cache_time > 0) {
+            $this->_build->cache($this->_cache_time);
         }
-        return $this->build;
+        if ($this->_cache_column) {
+            $this->_build->cacheColumn($this->_cache_column);
+        }
+        return $this->_build;
     }
 
     public function __call($name, $arguments)
