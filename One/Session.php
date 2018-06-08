@@ -26,11 +26,16 @@ class Session
 
     public function get($key = null)
     {
-        if($key){
+        if ($key) {
             return array_get($this->data, $key);
-        }else{
+        } else {
             return $this->data;
         }
+    }
+
+    public function del($key)
+    {
+        unset($this->data[$key]);
     }
 
     public function __destruct()

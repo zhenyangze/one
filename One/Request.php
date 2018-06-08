@@ -53,12 +53,14 @@ class Request
 
     private function getFromArr($arr, $key, $default = null)
     {
+        if ($key === null) {
+            return $arr;
+        }
         $r = array_get($arr, $key);
         if (!$r) {
             $r = $default;
         }
         return $r;
-
     }
 
     /**
@@ -66,7 +68,7 @@ class Request
      * @param $default
      * @return mixed|null
      */
-    public function get($key, $default = null)
+    public function get($key = null, $default = null)
     {
         return $this->getFromArr($_GET, $key, $default);
     }
@@ -75,7 +77,7 @@ class Request
      * @param $key
      * @return mixed|null
      */
-    public function post($key, $default = null)
+    public function post($key = null, $default = null)
     {
         return $this->getFromArr($_POST, $key, $default);
     }
@@ -84,7 +86,7 @@ class Request
      * @param int $i
      * @return mixed|null
      */
-    public function arg($i, $default = null)
+    public function arg($i = null, $default = null)
     {
         global $argv;
         return $this->getFromArr($argv, $i, $default);
@@ -95,7 +97,7 @@ class Request
      * @param $key
      * @return mixed|null
      */
-    public function res($key, $default = null)
+    public function res($key = null, $default = null)
     {
         return $this->getFromArr($_REQUEST, $key, $default);
     }

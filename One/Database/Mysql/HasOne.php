@@ -16,6 +16,5 @@ class HasOne extends Relation
             $k = $val[$this->self_column];
             $val->$key = isset($third_arr[$k]) ? $third_arr[$k] : null;
         }
-
     }
 }

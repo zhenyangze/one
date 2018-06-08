@@ -10,10 +10,10 @@ namespace One\Facades;
  * @method string userAgent() static
  * @method string uri() static
  * @method string id() static
- * @method string get($key, $default = null) static
- * @method string post($key, $default = null) static
- * @method string arg($i, $default = null) static
- * @method string res($key, $default = null) static
+ * @method string get($key = null, $default = null) static
+ * @method string post($key = null, $default = null) static
+ * @method string arg($i = null, $default = null) static
+ * @method string res($key = null, $default = null) static
  * @method string cookie($key, $default = null) static
  * @method string input() static
  * @method array json() static

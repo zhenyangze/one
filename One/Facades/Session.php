@@ -7,6 +7,7 @@ namespace One\Facades;
  * @package One\Facades
  * @method void set($key, $val) static
  * @method mixed get($key = null) static
+ * @method void del($key) static
  */
 class Session extends Facade
 {

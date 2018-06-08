@@ -57,6 +57,12 @@ class Session
         }
     }
 
+    public function del($key)
+    {
+        unset($this->data[$key]);
+    }
+
+
     public function __destruct()
     {
         $this->drive->set($this->prefix.$this->session_id, $this->data, $this->time);

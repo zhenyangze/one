@@ -95,7 +95,21 @@ class Build
     {
         $this->is_count = 1;
         $res = $this->connect->find($this->getSelectSql(), $this->build);
+        $this->is_count = 0;
         return $res->row_count;
+    }
+
+    protected $sum_column = '';
+
+    /**
+     * @param $column
+     * @return int
+     */
+    public function sum($column)
+    {
+        $this->sum_column = $column;
+        $res = $this->connect->find($this->getSelectSql(), $this->build);
+        return $res->sum_value;
     }
 
     /**
@@ -269,6 +283,8 @@ class Build
         $sql = 'select';
         if ($this->is_count) {
             $column = ' count(*) as row_count ';
+        } else if ($this->sum_column) {
+            $column = ' sum(' . $this->sum_column . ') as sum_value ';
         } else if ($this->distinct) {
             $column = ' distinct ' . $this->distinct;
         } else {
@@ -307,7 +323,7 @@ class Build
                 }
                 $values[] = '(' . substr(str_repeat(',?', count($keys)), 1) . ')';
             }
-            $sql .= ' values '.implode(',', $values);
+            $sql .= ' values ' . implode(',', $values);
         } else {
             $build = array_values($data);
             $sql .= ' values (' . substr(str_repeat(',?', count($keys)), 1) . ')';
@@ -322,9 +338,9 @@ class Build
         $build = [];
         $this->filter($data);
         foreach ($data as $k => $v) {
-            if(is_numeric($k)){
+            if (is_numeric($k)) {
                 $sql .= "{$v[0]}={$v[1]}";
-            }else{
+            } else {
                 $sql .= "{$k}=?,";
                 $build[] = $v;
             }
