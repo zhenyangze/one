@@ -2,7 +2,6 @@
 
 namespace One\Database\Mysql;
 
-
 class HasMany extends Relation
 {
     public function get()

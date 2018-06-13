@@ -45,6 +45,18 @@ class CacheBuild extends Build
         }, $this->cache_time, $this->cache_tag);
     }
 
+    public function sum($column)
+    {
+        if ($this->cache_time == 0) {
+            return parent::sum($column);
+        }
+        $this->sum_column = $column;
+        return Cache::get($this->getCacheKey(), function () use ($column) {
+            return parent::sum($column);
+        }, $this->cache_time, $this->cache_tag);
+    }
+
+
     public function findAll()
     {
         if ($this->cache_time == 0) {
