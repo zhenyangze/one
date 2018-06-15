@@ -5,12 +5,35 @@ namespace One;
 class Request
 {
 
+    protected $server = [];
+
+    protected $cookie = [];
+
+    protected $get = [];
+
+    protected $post = [];
+
+    protected $files = [];
+
+    private $request = [];
+
+
+    public function __construct()
+    {
+        $this->server = &$_SERVER;
+        $this->cookie = &$_COOKIE;
+        $this->get = &$_GET;
+        $this->post = &$_POST;
+        $this->files = &$_FILES;
+        $this->request = &$_REQUEST;
+    }
+
     /**
      * @return string|null
      */
     public function ip()
     {
-        return array_get_not_null($_SERVER, ['REMOTE_ADDR', 'HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR']);
+        return array_get_not_null($this->server, ['REMOTE_ADDR', 'HTTP_X_REAL_IP', 'HTTP_X_FORWARDED_FOR']);
     }
 
 
@@ -20,7 +43,7 @@ class Request
      */
     public function server($name)
     {
-        return array_get($_SERVER, $name);
+        return array_get($this->server, $name);
     }
 
     /**
@@ -36,7 +59,7 @@ class Request
      */
     public function uri()
     {
-        $path = urldecode(array_get_not_null($_SERVER, ['REQUEST_URI', 'argv.1']));
+        $path = urldecode(array_get_not_null($this->server, ['REQUEST_URI', 'argv.1']));
         $paths = explode('?', $path);
         return '/' . trim($paths[0], '/');
     }
@@ -51,7 +74,7 @@ class Request
     }
 
 
-    private function getFromArr($arr, $key, $default = null)
+    protected function getFromArr($arr, $key, $default = null)
     {
         if ($key === null) {
             return $arr;
@@ -70,7 +93,7 @@ class Request
      */
     public function get($key = null, $default = null)
     {
-        return $this->getFromArr($_GET, $key, $default);
+        return $this->getFromArr($this->get, $key, $default);
     }
 
     /**
@@ -79,7 +102,7 @@ class Request
      */
     public function post($key = null, $default = null)
     {
-        return $this->getFromArr($_POST, $key, $default);
+        return $this->getFromArr($this->post, $key, $default);
     }
 
     /**
@@ -99,7 +122,7 @@ class Request
      */
     public function res($key = null, $default = null)
     {
-        return $this->getFromArr($_REQUEST, $key, $default);
+        return $this->getFromArr($this->request, $key, $default);
     }
 
 
@@ -109,7 +132,7 @@ class Request
      */
     public function cookie($key, $default = null)
     {
-        return $this->getFromArr($_COOKIE, $key, $default);
+        return $this->getFromArr($this->cookie, $key, $default);
     }
 
     /**
@@ -134,7 +157,7 @@ class Request
     public function file()
     {
         $files = [];
-        foreach ($_FILES as $name => $fs) {
+        foreach ($this->files as $name => $fs) {
             $keys = array_keys($fs);
             if (is_array($fs[$keys[0]])) {
                 foreach ($keys as $k => $v) {
