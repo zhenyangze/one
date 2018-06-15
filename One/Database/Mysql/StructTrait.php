@@ -44,7 +44,7 @@ trait StructTrait
      * 过滤
      * @param $data
      */
-    public function filter(&$data)
+    public function filter($data)
     {
         $field = $this->getStruct()['field'];
         foreach ($data as $k => $v) {
@@ -52,5 +52,6 @@ trait StructTrait
                 unset($data[$k]);
             }
         }
+        return $data;
     }
 }

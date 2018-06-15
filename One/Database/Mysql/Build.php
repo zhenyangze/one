@@ -313,7 +313,7 @@ class Build
     private function getInsertSql($data, $is_mulit = false)
     {
         $sql = 'insert into ' . $this->from;
-        $this->filter($data);
+        $data = $this->filter($data);
         $build = [];
         $keys = array_keys($data);
         $sql .= ' (' . implode(',', $keys) . ')';
@@ -339,7 +339,7 @@ class Build
     {
         $sql = 'update ' . $this->from . ' set ';
         $build = [];
-        $this->filter($data);
+        $data = $this->filter($data);
         foreach ($data as $k => $v) {
             if (is_numeric($k)) {
                 $sql .= "{$v[0]}={$v[1]}";

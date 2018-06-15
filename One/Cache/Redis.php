@@ -34,7 +34,7 @@ class Redis extends Cache
         $this->driver->connect(self::$conf['host'], self::$conf['port'], 0);
     }
 
-    public function get($key, \Closure $closure = null, $ttl = 0, $tags = [])
+    public function get($key, \Closure $closure = null, $ttl = null, $tags = [])
     {
         $val = $this->driver->get($this->getTagKey($key, $tags));
         if ((!$val) && $closure) {
@@ -62,11 +62,11 @@ class Redis extends Cache
     public function flush($tag)
     {
         $id = md5(uuid());
-        $this->set($tag, $id, null);
+        $this->set($tag, $id);
         return $id;
     }
 
-    public function set($key, $val, $ttl = 0, $tags = [])
+    public function set($key, $val, $ttl = null, $tags = [])
     {
         $this->driver->set($this->getTagKey($key, $tags), serialize($val), $ttl);
     }
