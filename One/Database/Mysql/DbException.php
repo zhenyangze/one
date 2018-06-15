@@ -2,11 +2,12 @@
 
 namespace One\Database\Mysql;
 
+use One\Facades\Log;
 
 class DbException extends \Exception
 {
     public function __construct($message = "", $code = 0, $previous = null)
     {
-        echo $message;
+        Log::error($message,'dbError',3 + $code);
     }
 }

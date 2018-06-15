@@ -34,12 +34,15 @@ class Connect
     public function execute($sql, $data = [])
     {
         $res = $this->getPdo()->prepare($sql, [\PDO::ATTR_CURSOR => \PDO::CURSOR_SCROLL]);
+        if(!$res){
+            throw new DbException(json_encode(['info' => $this->getPdo()->errorInfo(), 'sql' => $sql]), 7);
+        }
         $res->setFetchMode(\PDO::FETCH_CLASS, $this->model);
         if (!$res->execute($data)) {
             if ($this->isBreak($res->errorInfo()[2])) {
                 return $this->close()->execute($sql, $data);
             }
-            throw new DbException(json_encode(['info' => $res->errorInfo(), 'sql' => $sql]), 1);
+            throw new DbException(json_encode(['info' => $res->errorInfo(), 'sql' => $sql]), 2);
         }
         return $res;
     }
