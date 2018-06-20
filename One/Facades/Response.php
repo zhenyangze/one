@@ -8,7 +8,7 @@ namespace One\Facades;
  * @method string error($msg, $code = 400) static
  * @method string code($code) static
  * @method string json($data, $callback = null) static
- * @method string redirectMethod($m, $args = []) static
+ * @method void redirectMethod($m, $args = []) static
  * @method string redirect($url, $args = []) static
  * @method string tpl($template, $data = []) static
  *
