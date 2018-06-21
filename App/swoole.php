@@ -12,9 +12,17 @@ require_once _APP_PATH_.'/config.php';
 
 \One\Swoole\Swoole::setConfig(['start' => function($request,$response){
     try{
-        $response->write(\One\Facades\Router::exec());
+        $res = \One\Facades\Router::exec();
+        if($res){
+            $response->write($res);
+        }
     }catch (Exception $e){
-        $response->write((new \App\Exceptions\Handler())->render($e));
+        $res = (new \App\Exceptions\Handler())->render($e);
+        if($res){
+            $response->write($res);
+        }else{
+            $response->write('request fail');
+        }
     }
     \One\Facades\Facade::clear(\One\Swoole\Request::class);
     \One\Facades\Facade::clear(\One\Swoole\Response::class);
