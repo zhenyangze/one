@@ -3,6 +3,7 @@
 namespace One\Database\Mysql;
 
 use One\ConfigTrait;
+use One\Facades\Log;
 
 class Connect
 {
@@ -31,20 +32,28 @@ class Connect
      * @param array $data
      * @return \PDOStatement
      */
-    public function execute($sql, $data = [])
+    public function execute($sql, $data = [], $retry = true)
     {
+        $this->debugLog($sql,$data);
         $res = $this->getPdo()->prepare($sql, [\PDO::ATTR_CURSOR => \PDO::CURSOR_SCROLL]);
-        if(!$res){
+        if (!$res) {
             throw new DbException(json_encode(['info' => $this->getPdo()->errorInfo(), 'sql' => $sql]), 7);
         }
         $res->setFetchMode(\PDO::FETCH_CLASS, $this->model);
         if (!$res->execute($data)) {
-            if ($this->isBreak($res->errorInfo()[2])) {
-                return $this->close()->execute($sql, $data);
+            if ($this->isBreak($res->errorInfo()[2]) && $retry) {
+                return $this->close()->execute($sql, $data, false);
             }
-            throw new DbException(json_encode(['info' => $res->errorInfo(), 'sql' => $sql]), 2);
+            throw new DbException(json_encode(['info' => $res->errorInfo(), 'sql' => $sql]), 7);
         }
         return $res;
+    }
+
+    private function debugLog($sql, $build = [])
+    {
+        if (self::$conf['debug_log']) {
+            Log::debug(['sql' => $sql,'data'=>$build],'sql',10);
+        }
     }
 
     public function getDns()
@@ -129,6 +138,7 @@ class Connect
         if ($this->inTransaction()) {
             return true;
         }
+        $this->debugLog('begin');
         return $this->getPdo()->beginTransaction();
     }
 
@@ -138,6 +148,7 @@ class Connect
     public function rollBack()
     {
         if ($this->inTransaction()) {
+            $this->debugLog('rollBack');
             return $this->getPdo()->rollBack();
         }
         return false;
@@ -149,6 +160,7 @@ class Connect
     public function commit()
     {
         if ($this->inTransaction()) {
+            $this->debugLog('commit');
             return $this->getPdo()->commit();
         }
         return false;

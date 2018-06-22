@@ -19,7 +19,7 @@ class Controller
 
     protected function error($msg, $code)
     {
-        return FacadeResponse::error($msg,$code);
+        return FacadeResponse::error($msg, $code);
     }
 
     /**
@@ -36,7 +36,7 @@ class Controller
      */
     protected function jsonp($data, $callback = 'callback')
     {
-        return FacadeResponse::json($data,$callback);
+        return FacadeResponse::json($data, $callback);
     }
 
     /**
@@ -47,8 +47,8 @@ class Controller
     {
         foreach ($fields as $v) {
             $val = array_get($data, $v);
-            if ($val == null && $val == '') {
-                alert("{$v}不能为空",4001);
+            if ($val === null || $val == '') {
+                alert("{$v}不能为空", 4001);
             }
         }
     }
@@ -60,7 +60,8 @@ class Controller
      */
     protected function display($tpl, $data = [])
     {
-        return FacadeResponse::tpl($tpl, $data);
+        $dir = strtolower(substr(get_called_class(), 16, -10));
+        return FacadeResponse::tpl($dir . '/' . $tpl, $data);
     }
 
 }

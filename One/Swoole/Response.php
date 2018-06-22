@@ -18,4 +18,9 @@ class Response extends \One\Response
     {
         Swoole::$response->status($code);
     }
+
+    public function cookie()
+    {
+        Swoole::$response->cookie(...func_get_args());
+    }
 }

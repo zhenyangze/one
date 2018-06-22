@@ -37,6 +37,12 @@ class Response
         return $this->result();
     }
 
+    public function cookie()
+    {
+        setcookie(...func_get_args());
+    }
+
+
 
     public function json($data, $callback = null)
     {

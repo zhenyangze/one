@@ -11,6 +11,7 @@ namespace One\Facades;
  * @method void redirectMethod($m, $args = []) static
  * @method string redirect($url, $args = []) static
  * @method string tpl($template, $data = []) static
+ * @method string cookie($name, $value = "", $expire = 0, $path = "", $domain = "", $secure = false, $httponly = false) static
  *
  */
 

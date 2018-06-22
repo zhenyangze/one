@@ -53,19 +53,17 @@ class Log
 
     private function _log($data, $k = 0, $code = 3, $prefix = 'vic')
     {
-
-        $dir = self::$conf['path'] . '/' . date('Y-m-d') . '/';
-        if (!is_dir($dir)) {
-            mkdir($dir, 0755, true);
+        if (!is_dir(self::$conf['path'])) {
+            mkdir(self::$conf['path'], 0755, true);
         }
-        $path = $dir . $prefix . date('H') . '.log';
+        $path = self::$conf['path'] . '/' . $prefix . '-' . date('Y-m-d') . '.log';
         if (is_string($data)) {
             $data = str_replace("\n", ' ', $data);
         } else {
             $data = json_encode($data, JSON_UNESCAPED_UNICODE);
         }
 
-        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 12);
+        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 16);
         $name = $trace[$k]['file'];
         $line = $trace[$k]['line'];
 

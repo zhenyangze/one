@@ -20,6 +20,7 @@ trait WhereTrait
     public function where($key, $operator = null, $val = null, $link = ' and ')
     {
         if (is_array($key)) {
+            $key = $this->filter($key);
             foreach ($key as $k => $v) {
                 $this->where[] = [$k, '=', $v, $link];
             }
