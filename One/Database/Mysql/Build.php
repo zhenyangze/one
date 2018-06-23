@@ -18,7 +18,7 @@ class Build
     /**
      * @var EventBuild
      */
-    protected $model;
+    public $model;
 
     public function __construct($connection, $model, $model_name, $table)
     {

@@ -14,7 +14,7 @@ class Relation
     public function __construct($self_column, $third_model, $third_column, $model)
     {
         $this->self_column = $self_column;
-        $this->third_model = new $third_model;
+        $this->third_model = new $third_model($this);
         $this->third_column = $third_column;
         $this->model = $model;
     }

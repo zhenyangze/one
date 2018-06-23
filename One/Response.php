@@ -42,16 +42,14 @@ class Response
         setcookie(...func_get_args());
     }
 
-
-
     public function json($data, $callback = null)
     {
         $this->header('Content-type', 'application/json');
         $this->result['res'] = $data;
         if ($callback) {
-            return $callback . '(' . json_encode($data) . ')';
+            return $callback . '(' . json_encode($this->result) . ')';
         } else {
-            return json_encode($data);
+            return json_encode($this->result);
         }
     }
 

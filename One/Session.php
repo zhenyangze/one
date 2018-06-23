@@ -15,7 +15,7 @@ class Session
             session_set_save_handler(new \One\Cache\SessionHandler($time), true);
         }
         session_start();
-        setcookie(session_name(), session_id(), time() + $time);
+        setcookie(session_name(), session_id(), time() + $time, '/');
         $this->data = $_SESSION;
     }
 

@@ -21,9 +21,21 @@ class Model extends ArrayModel
 
     protected $_cache_column = [];
 
+    protected $_relation = null;
+
     CONST TABLE = '';
 
     private $_build = null;
+
+    public function __construct($relation = null)
+    {
+        $this->_relation = $relation;
+    }
+
+    public function relation()
+    {
+        return $this->_relation;
+    }
 
     private function build()
     {
@@ -52,7 +64,12 @@ class Model extends ArrayModel
     public function __get($name)
     {
         if (method_exists($this, $name)) {
-            $this->$name = $this->$name()->setRelation()->get();
+            $obj = $this->$name();
+            if($obj instanceof Build){
+                $this->$name = $obj->model->relation()->setRelation()->get();
+            }else{
+                $this->$name = $obj->setRelation()->get();
+            }
             return $this->$name;
         }
     }

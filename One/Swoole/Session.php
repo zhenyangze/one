@@ -38,9 +38,9 @@ class Session
             $this->drive = new File();
         }
 
-        Swoole::$response->cookie($this->name, $this->session_id, time() + $this->time);
+        Swoole::$response->cookie($this->name, $this->session_id, time() + $this->time, '/');
 
-        $this->data = $this->drive->get($this->prefix.$this->session_id);
+        $this->data = $this->drive->get($this->prefix . $this->session_id);
     }
 
     public function set($key, $val)
@@ -65,7 +65,7 @@ class Session
 
     public function __destruct()
     {
-        $this->drive->set($this->prefix.$this->session_id, $this->data, $this->time);
+        $this->drive->set($this->prefix . $this->session_id, $this->data, $this->time);
     }
 
 }
