@@ -17,7 +17,7 @@ class Controller
 
     }
 
-    protected function error($msg, $code)
+    protected function error($msg, $code = 1)
     {
         return FacadeResponse::error($msg, $code);
     }

@@ -4,7 +4,7 @@
  * @param $msg
  * @param $code
  */
-function alert($msg, $code)
+function alert($msg, $code = 1)
 {
     throw new \One\Exceptions\HttpException($msg, $code);
 }
