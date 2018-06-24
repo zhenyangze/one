@@ -20,50 +20,13 @@ class CacheBuild extends Build
 
     private $cache_tag = [];
 
-    public function find($id = null)
-    {
-        $this->limit(1);
-        if ($id) {
-            $this->where($this->getPriKey(), $id);
-        }
-        if ($this->cache_time == 0) {
-            return parent::find();
-        }
-        return Cache::get($this->getCacheKey(), function () {
-            return parent::find();
-        }, $this->cache_time, $this->cache_tag);
-    }
-
-    public function count()
+    protected function getData($all = false)
     {
         if ($this->cache_time == 0) {
-            return parent::count();
+            return parent::getData($all);
         }
-        $this->is_count = 1;
-        return Cache::get($this->getCacheKey(), function () {
-            return parent::count();
-        }, $this->cache_time, $this->cache_tag);
-    }
-
-    public function sum($column)
-    {
-        if ($this->cache_time == 0) {
-            return parent::sum($column);
-        }
-        $this->sum_column = $column;
-        return Cache::get($this->getCacheKey(), function () use ($column) {
-            return parent::sum($column);
-        }, $this->cache_time, $this->cache_tag);
-    }
-
-
-    public function findAll()
-    {
-        if ($this->cache_time == 0) {
-            return parent::findAll();
-        }
-        return Cache::get($this->getCacheKey(), function () {
-            return parent::findAll();
+        return Cache::get($this->getCacheKey(), function () use ($all) {
+            return parent::getData($all);
         }, $this->cache_time, $this->cache_tag);
     }
 
@@ -116,12 +79,12 @@ class CacheBuild extends Build
 
             $keys = [];
             foreach ($this->columns as $f) {
-                if(isset($data[$f])){
-                    $keys[] = $f.'_'.$data[$f];
+                if (isset($data[$f])) {
+                    $keys[] = $f . '_' . $data[$f];
                 }
             }
-            if($keys){
-                return '-'.implode(':',$keys);
+            if ($keys) {
+                return '-' . implode(':', $keys);
             }
         }
         return '';

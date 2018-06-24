@@ -74,10 +74,22 @@ class Build
         }
     }
 
-    public function find()
+    protected function getData($all = false)
     {
-        $res = $this->connect->find($this->getSelectSql(), $this->build);
-        return $this->fillSelectWith($res, 'setRelationModel');
+        if($all){
+            return $this->connect->findAll($this->getSelectSql(), $this->build);
+        }else{
+            $this->limit(1);
+            return $this->connect->find($this->getSelectSql(), $this->build);
+        }
+    }
+
+    public function find($id = null)
+    {
+        if ($id) {
+            $this->where($this->getPriKey(), $id);
+        }
+        return $this->fillSelectWith($this->getData(), 'setRelationModel');
     }
 
     /**
@@ -85,7 +97,7 @@ class Build
      */
     public function findAll()
     {
-        $res = new ListModel($this->connect->findAll($this->getSelectSql(), $this->build));
+        $res = new ListModel($this->getData(true));
         return $this->fillSelectWith($res, 'setRelationList');
     }
 
@@ -97,7 +109,7 @@ class Build
     public function count()
     {
         $this->is_count = 1;
-        $res = $this->connect->find($this->getSelectSql(), $this->build);
+        $res = $this->getData();
         $this->is_count = 0;
         return $res->row_count;
     }
@@ -111,7 +123,7 @@ class Build
     public function sum($column)
     {
         $this->sum_column = $column;
-        $res = $this->connect->find($this->getSelectSql(), $this->build);
+        $res = $this->getData();
         return $res->sum_value;
     }
 
