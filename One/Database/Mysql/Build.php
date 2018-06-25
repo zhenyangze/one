@@ -89,16 +89,23 @@ class Build
         if ($id) {
             $this->where($this->getPriKey(), $id);
         }
-        return $this->fillSelectWith($this->getData(), 'setRelationModel');
+        $info = $this->getData();
+        if (!$info) {
+            return null;
+        }
+        return $this->fillSelectWith($info, 'setRelationModel');
     }
 
     /**
-     * @return ListModel
+     * @return ListModel|false
      */
     public function findAll()
     {
-        $res = new ListModel($this->getData(true));
-        return $this->fillSelectWith($res, 'setRelationList');
+        $info = $this->getData(true);
+        if (!$info) {
+            return null;
+        }
+        return $this->fillSelectWith(new ListModel($info), 'setRelationList');
     }
 
     protected $is_count = 0;
@@ -389,7 +396,7 @@ class Build
     {
         $obj = get_object_vars($this->model);
         foreach ($obj as &$v) {
-            if(is_object($v)){
+            if (is_object($v)) {
                 $v = $v->toArray();
             }
         }

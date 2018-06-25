@@ -17,7 +17,7 @@ class Log
      */
     public function debug($data, $prefix = 'debug', $k = 0)
     {
-        $this->_log($data, $k + 1, 3, $prefix);
+        $this->_log($data, $k + 2, 3, $prefix);
     }
 
     /**
@@ -27,7 +27,7 @@ class Log
      */
     public function notice($data, $prefix = 'notice', $k = 0)
     {
-        $this->_log($data, $k + 1, 2, $prefix);
+        $this->_log($data, $k + 2, 2, $prefix);
     }
 
     /**
@@ -37,7 +37,7 @@ class Log
      */
     public function warn($data, $prefix = 'warn', $k = 0)
     {
-        $this->_log($data, $k + 1, 1, $prefix);
+        $this->_log($data, $k + 2, 1, $prefix);
     }
 
     /**
@@ -47,7 +47,7 @@ class Log
      */
     public function error($data, $prefix = 'error', $k = 0)
     {
-        $this->_log($data, $k + 1, 0, $prefix);
+        $this->_log($data, $k + 2, 0, $prefix);
     }
 
 
