@@ -76,9 +76,9 @@ class Build
 
     protected function getData($all = false)
     {
-        if($all){
+        if ($all) {
             return $this->connect->findAll($this->getSelectSql(), $this->build);
-        }else{
+        } else {
             $this->limit(1);
             return $this->connect->find($this->getSelectSql(), $this->build);
         }
@@ -383,6 +383,17 @@ class Build
                 $this->where($pri, $this->model->$pri);
             }
         }
+    }
+
+    public function toArray()
+    {
+        $obj = get_object_vars($this->model);
+        foreach ($obj as &$v) {
+            if(is_object($v)){
+                $v = $v->toArray();
+            }
+        }
+        return $obj;
     }
 
 }

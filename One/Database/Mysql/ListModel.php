@@ -65,4 +65,13 @@ class ListModel implements \Iterator, \JsonSerializable
         return $this->index;
     }
 
+    public function toArray()
+    {
+        $r = [];
+        foreach ($this->data as $val) {
+            $r[] = $val->toArray();
+        }
+        return $r;
+    }
+
 }

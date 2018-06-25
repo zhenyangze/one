@@ -35,17 +35,6 @@ return [
 
 ## 路由
 
- * @method void group(array $rule, \Closure $route)
- * @method void controller(string $path, string $controller)
- * @method void shell(string $path, string|array $action)
- * @method void get(string $path, string|array $action)
- * @method void post(string $path, string|array $action)
- * @method void put(string $path, string|array $action)
- * @method void delete(string $path, string|array $action)
- * @method void patch(string $path, string|array $action)
- * @method void head(string $path, string|array $action)
- * @method void options(string $path, string|array $action)
-
 
 ```php
 use One\Facades\Router;
@@ -134,7 +123,7 @@ $user = User::find(1);
 如果需要转换成数组  
 
 ```php
-$arr = (array) $user
+$arr = $user->toArray();
 ```
 
 列子： 

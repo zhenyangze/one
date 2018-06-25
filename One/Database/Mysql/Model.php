@@ -78,5 +78,4 @@ class Model extends ArrayModel
     {
         return [];
     }
-
 }
