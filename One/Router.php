@@ -159,7 +159,7 @@ class Router
             if ($i > 0) {
                 $r[] = function ($handler) use ($v) {
                     return function () use ($v, $handler) {
-                        return call($v, [$handler]);
+                        return call($v, array_merge([$handler],self::$args));
                     };
                 };
             }

@@ -300,6 +300,15 @@ class Build
         return $where;
     }
 
+    public function defaultColumn()
+    {
+        if(method_exists($this->model,__FUNCTION__)){
+            return $this->model->defaultColumn();
+        }else{
+            return ['*'];
+        }
+    }
+
     protected function getSelectSql()
     {
         $sql = 'select';
@@ -309,11 +318,10 @@ class Build
             $column = ' sum(' . $this->sum_column . ') as sum_value ';
         } else if ($this->distinct) {
             $column = ' distinct ' . $this->distinct;
-        } else {
+        } else if($this->columns){
             $column = implode(',', $this->columns);
-            if (!$column) {
-                $column = '*';
-            }
+        }else{
+            $column = implode(',', $this->defaultColumn());
         }
         $sql .= ' ' . $column . ' from ' . $this->from;
         foreach ($this->joins as $v) {

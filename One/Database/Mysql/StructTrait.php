@@ -10,8 +10,8 @@ trait StructTrait
 
     protected function getStruct()
     {
-        if(!isset(self::$struct[$this->from])){
-            $key = md5(__FILE__.$this->connect->getDns().$this->from);
+        if (!isset(self::$struct[$this->from])) {
+            $key = md5(__FILE__ . $this->connect->getDns() . $this->from);
             $str = Cache::get($key, function () {
                 $arr = $this->connect->getPdo()->query('desc ' . $this->from)->fetchAll(\PDO::FETCH_ASSOC);
                 $fields = [];
@@ -53,5 +53,13 @@ trait StructTrait
             }
         }
         return $data;
+    }
+
+    /**
+     * @return array
+     */
+    public function getFields()
+    {
+        return array_merge([$this->getPriKey()],$this->getStruct()['field']);
     }
 }

@@ -41,9 +41,9 @@ class Request
      * @param $name
      * @return mixed|null
      */
-    public function server($name)
+    public function server($name = null, $default = null)
     {
-        return array_get($this->server, $name);
+        return $this->getFromArr($this->server, $name, $default);
     }
 
     /**

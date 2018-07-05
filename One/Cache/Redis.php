@@ -71,5 +71,4 @@ class Redis extends Cache
         $this->driver->set($this->getTagKey($key, $tags), serialize($val), $ttl);
     }
 
-
 }
