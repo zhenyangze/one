@@ -102,9 +102,6 @@ class Build
     public function findAll()
     {
         $info = $this->getData(true);
-        if (!$info) {
-            return null;
-        }
         return $this->fillSelectWith(new ListModel($info), 'setRelationList');
     }
 
@@ -302,9 +299,9 @@ class Build
 
     public function defaultColumn()
     {
-        if(method_exists($this->model,__FUNCTION__)){
+        if (method_exists($this->model, __FUNCTION__)) {
             return $this->model->defaultColumn();
-        }else{
+        } else {
             return ['*'];
         }
     }
@@ -318,9 +315,9 @@ class Build
             $column = ' sum(' . $this->sum_column . ') as sum_value ';
         } else if ($this->distinct) {
             $column = ' distinct ' . $this->distinct;
-        } else if($this->columns){
+        } else if ($this->columns) {
             $column = implode(',', $this->columns);
-        }else{
+        } else {
             $column = implode(',', $this->defaultColumn());
         }
         $sql .= ' ' . $column . ' from ' . $this->from;
@@ -409,6 +406,16 @@ class Build
             }
         }
         return $obj;
+    }
+
+
+    public function __call($name, $arguments)
+    {
+        if (method_exists($this->model->relation(), $name)) {
+            return $this->model->relation()->$name(...$arguments);
+        }else{
+            throw new DbException('Undefined method '.$name);
+        }
     }
 
 }
