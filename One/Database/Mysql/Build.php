@@ -102,7 +102,11 @@ class Build
     public function findAll()
     {
         $info = $this->getData(true);
-        return $this->fillSelectWith(new ListModel($info), 'setRelationList');
+        $ret = new ListModel($info);
+        if($info){
+            $ret = $this->fillSelectWith($ret, 'setRelationList');
+        }
+        return $ret;
     }
 
     protected $is_count = 0;
