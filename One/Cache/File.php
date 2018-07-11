@@ -30,7 +30,7 @@ class File extends Cache
                 $time = substr($str, 0, 10);
                 $str = substr($str, 10);
                 if ($time > time()) {
-                    return unserialize($str);
+                    return igbinary_unserialize($str);
                 }
             }
         }
@@ -60,7 +60,7 @@ class File extends Cache
     {
         $key = $this->getTagKey($key, $tags);
         $file = $this->getFileName($key);
-        file_put_contents($file, (time() + $ttl) . serialize($val));
+        file_put_contents($file, (time() + $ttl) . igbinary_serialize($val));
     }
 
     public function del($key)
