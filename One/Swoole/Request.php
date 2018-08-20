@@ -6,7 +6,7 @@ namespace One\Swoole;
 class Request extends \One\Request
 {
 
-    private $id = '';
+    private $id = 'Request_id';
 
     public function __construct()
     {

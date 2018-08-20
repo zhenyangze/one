@@ -52,7 +52,16 @@ class Connect
     private function debugLog($sql, $build = [])
     {
         if (self::$conf['debug_log']) {
-            Log::debug(['sql' => $sql,'data'=>$build],'sql',10);
+            $info = explode('?',$sql);
+            foreach ($info as $i => &$v){
+                if(isset($build[$i])){
+                    $v = $v . "'{$build[$i]}'";
+                }
+            }
+            $s = implode('',$info);
+            $id = md5(str_replace('?','',$sql));
+
+            Log::debug(['sql' => $s,'id'=>$id],'sql',10);
         }
     }
 
