@@ -1,6 +1,6 @@
 <?php
 
-namespace One;
+namespace One\Http;
 
 class Request
 {
@@ -15,7 +15,7 @@ class Request
 
     protected $files = [];
 
-    private $request = [];
+    protected $request = [];
 
 
     public function __construct()

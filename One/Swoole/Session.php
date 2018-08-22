@@ -20,11 +20,11 @@ class Session
 
     private $prefix = 'session_';
 
-    public function __construct()
+    public function __construct(Response $response)
     {
         $this->name = config('session.name');
 
-        $this->session_id = \One\Facades\Request::cookie($this->name);
+        $this->session_id = $response->getHttpRequest()->cookie($this->name);
 
         if (!$this->session_id) {
             $this->session_id = sha1(uuid());
@@ -38,7 +38,7 @@ class Session
             $this->drive = new File();
         }
 
-        Swoole::$response->cookie($this->name, $this->session_id, time() + $this->time, '/');
+        $response->cookie($this->name, $this->session_id, time() + $this->time, '/');
 
         $this->data = $this->drive->get($this->prefix . $this->session_id);
     }

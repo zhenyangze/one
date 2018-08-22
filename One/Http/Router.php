@@ -4,36 +4,50 @@ namespace One;
 
 use One\Facades\Request as FacadeRequest;
 use One\Facades\Cache;
+use One\Http\Request;
+use One\Http\Response;
 
 class Router
 {
 
     use ConfigTrait;
 
-    public static $info = [];
+    public $info = [];
 
-    public static $as_info = [];
+    public $as_info = [];
 
-    public static $args = [];
+    public $args = [];
 
-    public static $paths = [];
+    public $paths = [];
 
-    public static $uri = '';
+    public $uri = '';
 
-    public static $class = '';
+    public $class = '';
 
-    public static $method = '';
+    public $method = '';
+
+    private $httpRequest = null;
+
+    private $httpResponse = null;
+
+    public function __construct(Request $request, Response $response)
+    {
+        $this->httpRequest = $request;
+        $this->httpResponse = $response;
+    }
 
 
     public function loadRouter()
     {
-        $key = md5(__FILE__.filemtime(self::$conf['path']));
+        $key = md5(__FILE__ . filemtime(self::$conf['path']));
+
         $info = Cache::get($key, function () {
             require self::$conf['path'];
-            return [self::$info, self::$as_info];
+            return [$this->info, $this->as_info];
         }, 60 * 60 * 24 * 30);
-        self::$info = $info[0];
-        self::$as_info = $info[1];
+
+        $this->info = $info[0];
+        $this->as_info = $info[1];
     }
 
     /**
@@ -41,9 +55,9 @@ class Router
      */
     private function getPath()
     {
-        self::$uri = FacadeRequest::uri();
-        self::$paths = explode('/', self::$uri);
-        return self::$paths;
+        $this->uri = FacadeRequest::uri();
+        $this->paths = explode('/', $this->uri);
+        return $this->paths;
     }
 
     /**
@@ -101,16 +115,16 @@ class Router
                 }
                 if (substr($key, 1, 2) == 'id') {
                     if (is_numeric($v)) {
-                        self::$args[] = $v;
+                        $this->args[] = $v;
                         return $arr[$key];
                     }
                 } else {
-                    self::$args[] = $v;
+                    $this->args[] = $v;
                     return $arr[$key];
                 }
             } else if ($s == '`') {
                 if (preg_match('/' . substr($key, 1, -1) . '/', $v)) {
-                    self::$args[] = $v;
+                    $this->args[] = $v;
                     return $arr[$key];
                 }
             }
@@ -120,7 +134,7 @@ class Router
 
     private function getAction()
     {
-        $info = $this->matchRouter(self::$info, $this->getKey());
+        $info = $this->matchRouter($this->info, $this->getKey());
         if (!$info) {
             alert('Not Found', 404);
         }
@@ -153,13 +167,13 @@ class Router
     {
         $fm = $this->getAction();
         $act = is_array($fm[0]) ? $fm[0]['use'] : $fm[0];
-        list(self::$class, self::$method) = explode('@', $act);
+        list($this->class, $this->method) = explode('@', $act);
         $r = [];
         foreach ($fm as $i => $v) {
             if ($i > 0) {
                 $r[] = function ($handler) use ($v) {
                     return function () use ($v, $handler) {
-                        return call($v, array_merge([$handler],self::$args));
+                        return call($v, array_merge([$handler], $this->args));
                     };
                 };
             }
@@ -171,7 +185,7 @@ class Router
                 $ac = $fm[0]['use'];
                 if (isset($fm[0]['cache'])) {
                     $cache = $fm[0]['cache'];
-                    $key = md5($ac . ':' . implode(',', self::$args));
+                    $key = md5($ac . ':' . implode(',', $this->args));
                     $res = Cache::get($key);
                     if ($res) {
                         return $res;
@@ -180,7 +194,7 @@ class Router
             } else {
                 $ac = $fm[0];
             }
-            $res = call($ac, self::$args);
+            $res = call($ac, $this->args);
             if ($cache) {
                 Cache::set($key, $res, $cache);
             }
@@ -276,7 +290,7 @@ class Router
                 $arr[] = '';
             }
         }
-        self::$info = array_merge_recursive(self::$info, $this->setPath($arr, $action));
+        $this->info = array_merge_recursive($this->info, $this->setPath($arr, $action));
     }
 
 
@@ -287,7 +301,7 @@ class Router
     private function createAsInfo($path, $action)
     {
         if (isset($action['as'])) {
-            self::$as_info[$action['as']] = rtrim($path, '/');
+            $this->as_info[$action['as']] = rtrim($path, '/');
         }
     }
 

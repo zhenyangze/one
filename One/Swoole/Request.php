@@ -3,23 +3,30 @@
 namespace One\Swoole;
 
 
-class Request extends \One\Request
+class Request extends \One\Http\Request
 {
 
     private $id = 'Request_id';
 
-    public function __construct()
+    /**
+     * @var \swoole_http_request
+     */
+    private $httpRequest;
+
+    public function __construct(\swoole_http_request $request)
     {
-        foreach (Swoole::$request->server as $k => $v){
+        foreach ($request->server as $k => $v){
             $this->server[str_replace('-','_',strtoupper($k))] = $v;
         }
-        foreach (Swoole::$request->header as $k => $v){
+        foreach ($request->header as $k => $v){
             $this->server['HTTP_'.str_replace('-','_',strtoupper($k))] = $v;
         }
-        $this->cookie = &Swoole::$request->cookie;
-        $this->get = &Swoole::$request->get;
-        $this->post = &Swoole::$request->post;
-        $this->files = &Swoole::$request->files;
+        $this->cookie = &$request->cookie;
+        $this->get = &$request->get;
+        $this->post = &$request->post;
+        $this->files = &$request->files;
+        $this->httpRequest = $request;
+        $this->request = $this->post + $this->get;
         $this->id = uuid();
     }
 
@@ -46,7 +53,7 @@ class Request extends \One\Request
      */
     public function input()
     {
-        return Swoole::$request->rawContent;
+        return $this->httpRequest->rawContent;
     }
 
 }
