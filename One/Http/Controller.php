@@ -2,24 +2,57 @@
 
 namespace One;
 
-use One\Facades\Response as FacadeResponse;
+use One\Swoole\Response;
+use One\Swoole\Session;
 
 class Controller
 {
 
-    public function __construct()
-    {
+    /**
+     * @var Response
+     */
+    protected $request = null;
 
+    /**
+     * @var Response
+     */
+    protected $response = null;
+
+    /**
+     * @var null
+     */
+    private $session = null;
+
+
+    public function __construct($request, $response)
+    {
+        $this->request = $request;
+        $this->response = $request;
     }
 
-    public function __destruct()
+    final public function run($action, $args = [])
     {
+        if (method_exists($this, $action)) {
+            $this->$action(...$args);
+        } else {
+            $this->error('not find', 404);
+        }
+    }
 
+    /**
+     * @return Session
+     */
+    public function session()
+    {
+        if(!$this->session){
+            $this->session = new Session($this->response);
+        }
+        return $this->session;
     }
 
     protected function error($msg, $code = 1)
     {
-        return FacadeResponse::error($msg, $code);
+
     }
 
     /**
@@ -27,7 +60,7 @@ class Controller
      */
     protected function json($data)
     {
-        return FacadeResponse::json($data);
+
     }
 
     /**
@@ -36,7 +69,7 @@ class Controller
      */
     protected function jsonp($data, $callback = 'callback')
     {
-        return FacadeResponse::json($data, $callback);
+
     }
 
     /**
