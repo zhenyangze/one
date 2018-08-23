@@ -59,7 +59,7 @@ class Connect
                 }
             }
             $s = implode('',$info);
-            $id = md5(str_replace('?','',$sql));
+            $id = md5(str_replace(['?',','],'',$sql));
 
             Log::debug(['sql' => $s,'id'=>$id],'sql',10);
         }

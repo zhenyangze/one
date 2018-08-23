@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'debug_log' => false,
+    'debug_log' => true,
     'default' => [
         'dns' => 'mysql:host=127.0.0.1;dbname=lysy',
         'username' => 'root',

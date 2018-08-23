@@ -145,7 +145,7 @@ function router($str, $data = [])
  */
 function formatJson($data, $code, $id)
 {
-    $arr = ['err' => $code, 'id' => $id];
+    $arr = ['err' => $code, 'rid' => $id];
     if ($code) {
         $arr['msg'] = $data;
     } else {
