@@ -10,10 +10,13 @@ require __DIR__.'/../vendor/autoload.php';
 
 require _APP_PATH_.'/config.php';
 
-\One\Facades\Router::loadRouter();
+\One\Http\Router::loadRouter();
 
 try{
-    echo \One\Facades\Router::exec();
+    $req = new \One\Http\Request();
+    $res = new \One\Http\Response($req);
+    echo \One\Http\Router::exec($req,$res);
+
 }catch (\One\Exceptions\HttpException $e){
     echo (new \App\Exceptions\Handler())->render($e);
 }catch (Exception $e){

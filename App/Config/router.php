@@ -1,6 +1,6 @@
 <?php
 
-use One\Facades\Router;
+use One\Http\Router;
 
 Router::get('/',\App\Controllers\IndexController::class.'@index');
 Router::get('/test',\App\Controllers\IndexController::class.'@test');

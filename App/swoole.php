@@ -8,7 +8,7 @@ define('_APP_PATH_VIEW_',__DIR__.'/View');
 require_once __DIR__.'/../One/run.php';
 require_once __DIR__.'/../vendor/autoload.php';
 require_once _APP_PATH_.'/config.php';
-\One\Facades\Router::loadRouter();
+\One\Http\Router::loadRouter();
 
 \One\Swoole\Swoole::setConfig(['start' => function($request,$response){
     try{

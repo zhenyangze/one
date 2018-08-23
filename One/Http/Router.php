@@ -11,61 +11,61 @@ class Router
 
     use ConfigTrait;
 
-    private $info = [];
+    private static $info = [];
 
-    private $as_info = [];
+    public static $as_info = [];
 
-    private $args = [];
+    private static $args = [];
 
-    private $paths = [];
+    private static $paths = [];
 
-    private $uri = '';
+    private static $uri = '';
 
-    private $class = '';
+    private static $class = '';
 
-    private $method = '';
+    private static $method = '';
 
-    private $httpRequest = null;
+    /**
+     * @var null|Request 
+     */
+    private static $httpRequest = null;
 
-    private $httpResponse = null;
-
-    public function __construct(Request $request, Response $response)
-    {
-        $this->httpRequest = $request;
-        $this->httpResponse = $response;
-    }
+    /**
+     * @var null|Response 
+     */
+    private static $httpResponse = null;
 
 
-    public function loadRouter()
+    public static function loadRouter()
     {
         $key = md5(__FILE__ . filemtime(self::$conf['path']));
 
         $info = Cache::get($key, function () {
             require self::$conf['path'];
-            return [$this->info, $this->as_info];
+            return [self::$info, self::$as_info];
         }, 60 * 60 * 24 * 30);
 
-        $this->info = $info[0];
-        $this->as_info = $info[1];
+        self::$info = $info[0];
+        self::$as_info = $info[1];
     }
 
     /**
      * @return array
      */
-    private function getPath()
+    private static function getPath()
     {
-        $this->uri = $this->httpRequest->uri();
-        $this->paths = explode('/', $this->uri);
-        return $this->paths;
+        self::$uri = self::$httpRequest->uri();
+        self::$paths = explode('/', self::$uri);
+        return self::$paths;
     }
 
     /**
      * @return string
      */
-    private function getKey()
+    private static function getKey()
     {
-        $method = $this->httpRequest->method();
-        $paths = $this->getPath();
+        $method = self::$httpRequest->method();
+        $paths = self::getPath();
         foreach ($paths as $i => $v) {
             if (is_numeric($v)) {
                 $paths[$i] = '#' . $v;
@@ -80,12 +80,12 @@ class Router
         return $path;
     }
 
-    private function matchRouter($arr, $key)
+    private static function matchRouter($arr, $key)
     {
         if (strpos($key, '.') !== false) {
             $keys = explode('.', $key);
             foreach ($keys as $v) {
-                $arr = $this->rules($arr, $v);
+                $arr = self::rules($arr, $v);
                 if ($arr === null) {
                     return null;
                 }
@@ -95,12 +95,12 @@ class Router
             }
             return $arr;
         } else {
-            return $this->rules($arr, $key);
+            return self::rules($arr, $key);
         }
     }
 
 
-    private function rules($arr, $v)
+    private static function rules($arr, $v)
     {
         if (isset($arr[$v])) {
             return $arr[$v];
@@ -114,16 +114,16 @@ class Router
                 }
                 if (substr($key, 1, 2) == 'id') {
                     if (is_numeric($v)) {
-                        $this->args[] = $v;
+                        self::$args[] = $v;
                         return $arr[$key];
                     }
                 } else {
-                    $this->args[] = $v;
+                    self::$args[] = $v;
                     return $arr[$key];
                 }
             } else if ($s == '`') {
                 if (preg_match('/' . substr($key, 1, -1) . '/', $v)) {
-                    $this->args[] = $v;
+                    self::$args[] = $v;
                     return $arr[$key];
                 }
             }
@@ -131,17 +131,17 @@ class Router
         return null;
     }
 
-    private function getAction()
+    private static function getAction()
     {
-        $info = $this->matchRouter($this->info, $this->getKey());
+        $info = self::matchRouter(self::$info, self::getKey());
         if (!$info) {
-            throw new HttpException($this->httpResponse,'Not Found',404);
+            throw new HttpException(self::$httpResponse,'Not Found',404);
         }
         if (is_array($info)) {
             if (isset($info[0])) {
                 $info = $info[0];
             } else {
-                throw new HttpException($this->httpResponse,'Not Found',404);
+                throw new HttpException(self::$httpResponse,'Not Found',404);
             }
         }
         $fm = [];
@@ -162,17 +162,20 @@ class Router
     /**
      * 执行路由对应的方法
      */
-    public function exec()
+    public static function exec($request,$response)
     {
-        $fm = $this->getAction();
+        self::$httpRequest = $request;
+        self::$httpResponse = $response;
+
+        $fm = self::getAction();
         $act = is_array($fm[0]) ? $fm[0]['use'] : $fm[0];
-        list($this->class, $this->method) = explode('@', $act);
+        list(self::$class, self::$method) = explode('@', $act);
         $r = [];
         foreach ($fm as $i => $v) {
             if ($i > 0) {
                 $r[] = function ($handler) use ($v) {
                     return function () use ($v, $handler) {
-                        return call($v, array_merge([$handler], $this->args));
+                        return call($v, array_merge([$handler], self::$args));
                     };
                 };
             }
@@ -184,7 +187,7 @@ class Router
                 $ac = $fm[0]['use'];
                 if (isset($fm[0]['cache'])) {
                     $cache = $fm[0]['cache'];
-                    $key = md5($ac . ':' . implode(',', $this->args));
+                    $key = md5($ac . ':' . implode(',', self::$args));
                     $res = Cache::get($key);
                     if ($res) {
                         return $res;
@@ -195,8 +198,8 @@ class Router
             }
 
             $cl = explode('@', $ac);
-            $obj = new $cl[0]($this->httpRequest,$this->httpResponse);
-            $res = $obj->run($cl[1],$this->args);
+            $obj = new $cl[0](self::$httpRequest,self::$httpResponse);
+            $res = $obj->run($cl[1],self::$args);
 
             if ($cache) {
                 Cache::set($key, $res, $cache);
@@ -204,12 +207,12 @@ class Router
             return $res;
         };
 
-        $run = $this->runBox($action, $r);
+        $run = self::runBox($action, $r);
         return $run();
     }
 
 
-    private function runBox($handler, $box)
+    private static function runBox($handler, $box)
     {
         foreach ($box as $fn) {
             $handler = $fn($handler);
@@ -217,23 +220,23 @@ class Router
         return $handler;
     }
 
-    private $group_info = [];
-    private $max_group_depth = 200;
+    private static $group_info = [];
+    private static $max_group_depth = 200;
 
     /**
      * @param array $rule ['prefix' => '','namespace'=>'','cache'=>1,'middle'=>[]]
      * @param \Closure $route
      */
-    public function group($rule, $route)
+    public static function group($rule, $route)
     {
-        $len = $this->max_group_depth - count($this->group_info);
-        $this->group_info[$len] = $rule;
-        ksort($this->group_info);
+        $len = self::$max_group_depth - count(self::$group_info);
+        self::$group_info[$len] = $rule;
+        ksort(self::$group_info);
         $route();
-        unset($this->group_info[$len]);
+        unset(self::$group_info[$len]);
     }
 
-    private function withGroupAction($group_info, $action)
+    private static function withGroupAction($group_info, $action)
     {
         if (is_array($action)) {
             if (isset($group_info['as']) && isset($action['as'])) {
@@ -266,7 +269,7 @@ class Router
         return $action;
     }
 
-    private function withGroupPath($group_info, $path)
+    private static function withGroupPath($group_info, $path)
     {
         $path = '/' . trim($path, '/');
         if (isset($group_info['prefix'])) {
@@ -277,14 +280,14 @@ class Router
     }
 
 
-    private function set($method, $path, $action)
+    private static function set($method, $path, $action)
     {
-        foreach ($this->group_info as $value) {
-            $action = $this->withGroupAction($value, $action);
-            $path = $this->withGroupPath($value, $path);
+        foreach (self::$group_info as $value) {
+            $action = self::withGroupAction($value, $action);
+            $path = self::withGroupPath($value, $path);
         }
         if (is_array($action)) {
-            $this->createAsInfo($path, $action);
+            self::createAsInfo($path, $action);
         }
         $arr = explode('/', $method . $path);
         if (is_array($action)) {
@@ -293,7 +296,7 @@ class Router
                 $arr[] = '';
             }
         }
-        $this->info = array_merge_recursive($this->info, $this->setPath($arr, $action));
+        self::$info = array_merge_recursive(self::$info, self::setPath($arr, $action));
     }
 
 
@@ -301,14 +304,14 @@ class Router
      * @param $path
      * @param array $action
      */
-    private function createAsInfo($path, $action)
+    private static function createAsInfo($path, $action)
     {
         if (isset($action['as'])) {
-            $this->as_info[$action['as']] = rtrim($path, '/');
+            self::$as_info[$action['as']] = rtrim($path, '/');
         }
     }
 
-    private function setPath($arr, $v, $i = 0)
+    private static function setPath($arr, $v, $i = 0)
     {
         if (isset($arr[$i])) {
             if (is_numeric($arr[$i])) {
@@ -316,7 +319,7 @@ class Router
             } else if ($arr[$i] == '') {
                 $arr[$i] = 0;
             }
-            return [$arr[$i] => $this->setPath($arr, $v, $i + 1)];
+            return [$arr[$i] => self::setPath($arr, $v, $i + 1)];
         } else {
             return $v;
         }
@@ -326,87 +329,87 @@ class Router
      * @param string $path
      * @param string $controller
      */
-    public function controller($path, $controller)
+    public static function controller($path, $controller)
     {
-        $this->get($path, $controller . '@' . 'getAction');
-        $this->post($path, $controller . '@' . 'postAction');
-        $this->put($path, $controller . '@' . 'putAction');
-        $this->delete($path, $controller . '@' . 'deleteAction');
-        $this->patch($path, $controller . '@' . 'patchAction');
-        $this->head($path, $controller . '@' . 'headAction');
-        $this->options($path, $controller . '@' . 'optionsAction');
+        self::get($path, $controller . '@' . 'getAction');
+        self::post($path, $controller . '@' . 'postAction');
+        self::put($path, $controller . '@' . 'putAction');
+        self::delete($path, $controller . '@' . 'deleteAction');
+        self::patch($path, $controller . '@' . 'patchAction');
+        self::head($path, $controller . '@' . 'headAction');
+        self::options($path, $controller . '@' . 'optionsAction');
     }
 
     /**
      * @param string $path
      * @param string|array $action
      */
-    public function shell($path, $action)
+    public static function shell($path, $action)
     {
-        $this->set('shell', $path, $action);
+        self::set('shell', $path, $action);
     }
 
     /**
      * @param string $path
      * @param string|array $action
      */
-    public function get($path, $action)
+    public static function get($path, $action)
     {
-        $this->set('get', $path, $action);
+        self::set('get', $path, $action);
     }
 
     /**
      * @param string $path
      * @param string|array $action
      */
-    public function post($path, $action)
+    public static function post($path, $action)
     {
-        $this->set('post', $path, $action);
+        self::set('post', $path, $action);
     }
 
     /**
      * @param string $path
      * @param string|array $action
      */
-    public function put($path, $action)
+    public static function put($path, $action)
     {
-        $this->set('put', $path, $action);
+        self::set('put', $path, $action);
     }
 
     /**
      * @param string $path
      * @param string|array $action
      */
-    public function delete($path, $action)
+    public static function delete($path, $action)
     {
-        $this->set('delete', $path, $action);
+        self::set('delete', $path, $action);
     }
 
     /**
      * @param string $path
      * @param string|array $action
      */
-    public function patch($path, $action)
+    public static function patch($path, $action)
     {
-        $this->set('patch', $path, $action);
+        self::set('patch', $path, $action);
     }
 
     /**
      * @param string $path
      * @param string|array $action
      */
-    public function head($path, $action)
+    public static function head($path, $action)
     {
-        $this->set('head', $path, $action);
+        self::set('head', $path, $action);
     }
 
     /**
      * @param string $path
      * @param string|array $action
      */
-    public function options($path, $action)
+    public static function options($path, $action)
     {
-        $this->set('options', $path, $action);
+        self::set('options', $path, $action);
     }
 
 

@@ -53,7 +53,7 @@ class Request extends \One\Http\Request
      */
     public function input()
     {
-        return $this->httpRequest->rawContent;
+        return $this->httpRequest->rawContent();
     }
 
 }

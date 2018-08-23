@@ -9,7 +9,6 @@ class Start
     {
         $req = new Request($request);
         $res = new Response($req,$response);
-//        $session = new Session($res);
 
     }
 

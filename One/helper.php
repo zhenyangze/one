@@ -127,7 +127,7 @@ function filterXss($str, $allow_tags = null)
  */
 function router($str, $data = [])
 {
-    $url = array_get(\One\Router::$as_info, $str);
+    $url = array_get(\One\Http\Router::$as_info, $str);
     if ($data) {
         $key = array_map(function ($v) {
             return '{' . $v . '}';
