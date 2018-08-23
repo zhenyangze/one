@@ -1,30 +1,29 @@
 <?php
 
-namespace One;
+namespace One\Http;
 
-use One\Facades\Request as FacadeRequest;
+use One\ConfigTrait;
+use One\Exceptions\HttpException;
 use One\Facades\Cache;
-use One\Http\Request;
-use One\Http\Response;
 
 class Router
 {
 
     use ConfigTrait;
 
-    public $info = [];
+    private $info = [];
 
-    public $as_info = [];
+    private $as_info = [];
 
-    public $args = [];
+    private $args = [];
 
-    public $paths = [];
+    private $paths = [];
 
-    public $uri = '';
+    private $uri = '';
 
-    public $class = '';
+    private $class = '';
 
-    public $method = '';
+    private $method = '';
 
     private $httpRequest = null;
 
@@ -55,7 +54,7 @@ class Router
      */
     private function getPath()
     {
-        $this->uri = FacadeRequest::uri();
+        $this->uri = $this->httpRequest->uri();
         $this->paths = explode('/', $this->uri);
         return $this->paths;
     }
@@ -65,7 +64,7 @@ class Router
      */
     private function getKey()
     {
-        $method = FacadeRequest::method();
+        $method = $this->httpRequest->method();
         $paths = $this->getPath();
         foreach ($paths as $i => $v) {
             if (is_numeric($v)) {
@@ -136,13 +135,13 @@ class Router
     {
         $info = $this->matchRouter($this->info, $this->getKey());
         if (!$info) {
-            alert('Not Found', 404);
+            throw new HttpException($this->httpResponse,'Not Found',404);
         }
         if (is_array($info)) {
             if (isset($info[0])) {
                 $info = $info[0];
             } else {
-                alert('Not Found', 404);
+                throw new HttpException($this->httpResponse,'Not Found',404);
             }
         }
         $fm = [];
@@ -194,7 +193,11 @@ class Router
             } else {
                 $ac = $fm[0];
             }
-            $res = call($ac, $this->args);
+
+            $cl = explode('@', $ac);
+            $obj = new $cl[0]($this->httpRequest,$this->httpResponse);
+            $res = $obj->run($cl[1],$this->args);
+
             if ($cache) {
                 Cache::set($key, $res, $cache);
             }

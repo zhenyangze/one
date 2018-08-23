@@ -1,13 +1,5 @@
 <?php
 
-/**
- * @param $msg
- * @param $code
- */
-function alert($msg, $code = 1)
-{
-    throw new \One\Exceptions\HttpException($msg, $code);
-}
 
 /**
  * @param $path
@@ -148,3 +140,17 @@ function router($str, $data = [])
     return $url;
 }
 
+/**
+ * 统一格式json输出
+ */
+function formatJson($data, $code, $id)
+{
+    $arr = ['err' => $code, 'id' => $id];
+    if ($code) {
+        $arr['msg'] = $data;
+    } else {
+        $arr['msg'] = '';
+        $arr['res'] = $data;
+    }
+    return json_encode($arr);
+}

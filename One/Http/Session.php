@@ -7,7 +7,7 @@ class Session
 {
     private $data = [];
 
-    public function __construct()
+    public function __construct(Response $response)
     {
         session_name(config('session.name'));
         $time = intval(ini_get('session.gc_maxlifetime'));

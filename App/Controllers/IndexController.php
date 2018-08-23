@@ -3,8 +3,7 @@
 namespace App\Controllers;
 
 use App\Model\User;
-use One\Controller;
-use One\Facades\Session;
+use One\Http\Controller;
 
 class IndexController extends Controller
 {
@@ -13,19 +12,13 @@ class IndexController extends Controller
         $user = User::find(22);
         $user->teamMembers;
         return $this->json($user);
-//        return User::where('user_id',22)->update(['nickname' => 'nickname22']);
     }
 
     public function test()
     {
-//        $a = Session::get('aa');
-//        if($a){
-//            $a++;
-//        }else{
-//            $a=1;
-//        }
-//        Session::set('aa',$a);
-        return time();
+        $r = $this->session()->get('a');
+        $this->session()->set('a',$r + 1);
+        return $r;
     }
 
 }

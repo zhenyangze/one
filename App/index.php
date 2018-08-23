@@ -14,6 +14,9 @@ require _APP_PATH_.'/config.php';
 
 try{
     echo \One\Facades\Router::exec();
-}catch (Exception $e){
+}catch (\One\Exceptions\HttpException $e){
     echo (new \App\Exceptions\Handler())->render($e);
+}catch (Exception $e){
+    echo $e->getMessage();
+    \One\Facades\Log::debug($e);
 }

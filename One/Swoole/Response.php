@@ -2,7 +2,11 @@
 
 namespace One\Swoole;
 
-
+/**
+ * Class Response
+ * @package One\Swoole
+ * @mixin \swoole_http_response
+ */
 class Response extends \One\Http\Response
 {
 
@@ -40,24 +44,11 @@ class Response extends \One\Http\Response
         $this->httpResponse->cookie(...func_get_args());
     }
 
-    public function write($html)
+    public function __call($name, $arguments)
     {
-        $this->httpResponse->write($html);
-    }
-
-    public function end($html)
-    {
-        $this->httpResponse->end($html);
-    }
-
-    function gzip($level = 1)
-    {
-        $this->httpResponse->gzip($level);
-    }
-
-    function sendfile($filename)
-    {
-        $this->httpResponse->sendfile($filename);
+        if(method_exists($this->httpResponse,$name)){
+            return $this->httpResponse->$name(...$arguments);
+        }
     }
 
 }

@@ -3,27 +3,24 @@
 namespace App\Exceptions;
 
 use One\Exceptions\HttpException;
-use One\Facades\Log;
-use One\Facades\Request;
-use One\Facades\Response;
 
 class Handler
 {
-    public function render(\Exception $e)
+    public function render(HttpException $e)
     {
-        Response::code($e->getCode());
-        if ($e instanceof HttpException) {
-            return Response::error($e->getMessage(), 4001);
-        } else {
-            Log::error([
-                'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'code' => $e->getCode(),
-                'url' => Request::uri()
-            ]);
-            return Response::error('请求异常', 4000);
+        $e->response->code($e->getCode());
+
+        if($e->response->getHttpRequest()->isAjax()){
+            return $e->response->json(formatJson($e->getMessage(),$e->getCode(),$e->response->getHttpRequest()->id()));
+        }else{
+            $file = _APP_PATH_VIEW_ . '/Exceptions/' . $e->getCode() . '.php';
+            if (file_exists($file)) {
+                return $e->response->tpl('Exceptions/'.$e->getCode(),['e' => $e]);
+            }else{
+                return $e->response->json(formatJson($e->getMessage(),$e->getCode(),$e->response->getHttpRequest()->id()));
+            }
         }
     }
 
 }
+

@@ -69,7 +69,7 @@ class Log
 
         $code = $this->levels[$code];
 
-        $str = $code . '|' . date('Y-m-d H:i:s') . '|' . \One\Facades\Request::id() . '|' . $name . ':' . $line . '|' . $data . "\n";
+        $str = $code . '|' . date('Y-m-d H:i:s') . '|' . self::$conf['id'] . '|' . $name . ':' . $line . '|' . $data . "\n";
         error_log($str, 3, $path);
 
     }

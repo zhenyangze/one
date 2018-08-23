@@ -1,15 +1,14 @@
 <?php
 
-namespace One;
+namespace One\Http;
 
-use One\Swoole\Response;
-use One\Swoole\Session;
+use One\Exceptions\HttpException;
 
 class Controller
 {
 
     /**
-     * @var Response
+     * @var Request
      */
     protected $request = null;
 
@@ -24,16 +23,32 @@ class Controller
     private $session = null;
 
 
+    /**
+     * Controller constructor.
+     * @param $request
+     * @param $response
+     */
     public function __construct($request, $response)
     {
         $this->request = $request;
-        $this->response = $request;
+        $this->response = $response;
     }
 
+    /**
+     * 执行控制器方法
+     * @param $action
+     * @param array $args
+     * @throws HttpException
+     * @return string
+     */
     final public function run($action, $args = [])
     {
         if (method_exists($this, $action)) {
-            $this->$action(...$args);
+            try{
+                return $this->$action(...$args);
+            }catch (\Exception $e){
+                $this->error($e->getMessage(), $e->getCode());
+            }
         } else {
             $this->error('not find', 404);
         }
@@ -42,59 +57,71 @@ class Controller
     /**
      * @return Session
      */
-    public function session()
+    final protected function session()
     {
-        if(!$this->session){
+        if (!$this->session) {
             $this->session = new Session($this->response);
         }
         return $this->session;
     }
 
-    protected function error($msg, $code = 1)
+    /**
+     * 异常处理
+     * @param $msg
+     * @param int $code
+     * @throws HttpException
+     */
+    final protected function error($msg, $code = 400)
     {
-
+        throw new HttpException($this->response, $msg, $code);
     }
 
     /**
      * @param $data
+     * @return string
      */
-    protected function json($data)
+    final protected function json($data)
     {
-
+        return formatJson($data,0,$this->request->id());
     }
 
     /**
-     * @param array $data
+     * @param $data
      * @param string $callback
+     * @return string
      */
-    protected function jsonp($data, $callback = 'callback')
+    final protected function jsonP($data, $callback = 'callback')
     {
-
+        return $callback.'('.formatJson($data,0,$this->request->id()).')';
     }
 
     /**
+     * 检查必填字段
      * @param array $fields
      * @param array $data
+     * @throws HttpException
      */
-    protected function verify($fields, $data)
+    final protected function verify($fields, $data)
     {
         foreach ($fields as $v) {
             $val = array_get($data, $v);
             if ($val === null || $val == '') {
-                alert("{$v}不能为空", 4001);
+                $this->error("{$v}不能为空");
             }
         }
     }
 
     /**
-     * @param $tpl
+     * 模板渲染
+     * @param string $tpl 模板
      * @param array $data
      * @return string
+     * @throws HttpException
      */
-    protected function display($tpl, $data = [])
+    final protected function display($tpl, $data = [])
     {
         $dir = strtolower(substr(get_called_class(), 16, -10));
-        return FacadeResponse::tpl($dir . '/' . $tpl, $data);
+        return $this->response->tpl($dir . '/' . $tpl, $data);
     }
 
 }

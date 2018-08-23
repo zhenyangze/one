@@ -2,6 +2,8 @@
 
 namespace One\Http;
 
+use One\Exceptions\HttpException;
+
 class Response
 {
 
@@ -134,6 +136,33 @@ class Response
             $this->header('Location', $url, true, $args['httpCode']);
         } else {
             $this->header('Location', $url, true, 302);
+        }
+    }
+
+
+    /**
+     * @param string $file
+     * @param array $data
+     * @return string
+     * @throws HttpException
+     */
+    public function tpl($file, array $data = [])
+    {
+        if ($this->getHttpRequest()->isAjax()) {
+            $this->header('Content-type', 'application/json');
+            return formatJson($data, 0, $this->getHttpRequest()->id());
+        } else {
+            if (defined('_APP_PATH_VIEW_') === false) {
+                throw new HttpException($this, '未定义模板路径:_APP_PATH_VIEW_', 4001);
+            }
+            $file = _APP_PATH_VIEW_ . '/' . $file . '.php';
+            if (!file_exists($file)) {
+                throw new HttpException($this, '未定义模板路径:' . $file, 4002);
+            }
+            ob_start();
+            extract($data);
+            require $file;
+            return ob_get_clean();
         }
     }
 
