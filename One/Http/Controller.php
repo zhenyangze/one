@@ -59,10 +59,7 @@ class Controller
      */
     final protected function session()
     {
-        if (!$this->session) {
-            $this->session = new Session($this->response);
-        }
-        return $this->session;
+        return $this->response->session();
     }
 
     /**

@@ -12,6 +12,8 @@ class Response
      */
     protected $httpRequest;
 
+    protected $_session = null;
+
 
     public function __construct(Request $request)
     {
@@ -24,10 +26,23 @@ class Response
         return $this->httpRequest;
     }
 
+    /**
+     * @return Session
+     */
+    public function session()
+    {
+        if (!$this->_session) {
+            $this->_session = new Session($this);
+        }
+        return $this->_session;
+    }
 
+    /**
+     * @return bool
+     */
     public function cookie()
     {
-        setcookie(...func_get_args());
+        return setcookie(...func_get_args());
     }
 
     /**

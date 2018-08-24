@@ -41,7 +41,7 @@ class Response extends \One\Http\Response
 
     public function cookie()
     {
-        $this->httpResponse->cookie(...func_get_args());
+        return $this->httpResponse->cookie(...func_get_args());
     }
 
     public function __call($name, $arguments)
