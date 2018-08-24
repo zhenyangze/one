@@ -17,6 +17,11 @@ class Request
 
     protected $request = [];
 
+    public $args = [];
+
+    public $class = '';
+
+    public $method = '';
 
     public function __construct()
     {

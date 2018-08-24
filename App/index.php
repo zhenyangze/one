@@ -15,8 +15,7 @@ require _APP_PATH_.'/config.php';
 try{
     $req = new \One\Http\Request();
     $res = new \One\Http\Response($req);
-    echo \One\Http\Router::exec($req,$res);
-
+    echo (new \One\Http\Router())->exec($req,$res);
 }catch (\One\Exceptions\HttpException $e){
     echo (new \App\Exceptions\Handler())->render($e);
 }catch (Exception $e){

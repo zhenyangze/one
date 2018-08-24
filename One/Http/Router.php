@@ -15,25 +15,15 @@ class Router
 
     public static $as_info = [];
 
-    private static $args = [];
-
-    private static $paths = [];
-
-    private static $uri = '';
-
-    private static $class = '';
-
-    private static $method = '';
+    /**
+     * @var null|Request
+     */
+    private $httpRequest = null;
 
     /**
-     * @var null|Request 
+     * @var null|Response
      */
-    private static $httpRequest = null;
-
-    /**
-     * @var null|Response 
-     */
-    private static $httpResponse = null;
+    private $httpResponse = null;
 
 
     public static function loadRouter()
@@ -50,22 +40,12 @@ class Router
     }
 
     /**
-     * @return array
-     */
-    private static function getPath()
-    {
-        self::$uri = self::$httpRequest->uri();
-        self::$paths = explode('/', self::$uri);
-        return self::$paths;
-    }
-
-    /**
      * @return string
      */
-    private static function getKey()
+    private function getKey()
     {
-        $method = self::$httpRequest->method();
-        $paths = self::getPath();
+        $method = $this->httpRequest->method();
+        $paths = explode('/', $this->httpRequest->uri());
         foreach ($paths as $i => $v) {
             if (is_numeric($v)) {
                 $paths[$i] = '#' . $v;
@@ -80,12 +60,12 @@ class Router
         return $path;
     }
 
-    private static function matchRouter($arr, $key)
+    private function matchRouter($arr, $key)
     {
         if (strpos($key, '.') !== false) {
             $keys = explode('.', $key);
             foreach ($keys as $v) {
-                $arr = self::rules($arr, $v);
+                $arr = $this->rules($arr, $v);
                 if ($arr === null) {
                     return null;
                 }
@@ -95,12 +75,12 @@ class Router
             }
             return $arr;
         } else {
-            return self::rules($arr, $key);
+            return $this->rules($arr, $key);
         }
     }
 
 
-    private static function rules($arr, $v)
+    private function rules($arr, $v)
     {
         if (isset($arr[$v])) {
             return $arr[$v];
@@ -109,21 +89,22 @@ class Router
         foreach ($keys as $key) {
             $s = substr($key, 0, 1);
             if ($s == '{') {
+                $_k = substr($key, 1, -1);
                 if (substr($v, 0, 1) == '#') {
                     $v = substr($v, 1);
                 }
-                if (substr($key, 1, 2) == 'id') {
+                if ($_k == 'id') {
                     if (is_numeric($v)) {
-                        self::$args[] = $v;
+                        $this->httpRequest->args[$_k] = $v;
                         return $arr[$key];
                     }
                 } else {
-                    self::$args[] = $v;
+                    $this->httpRequest->args[$_k] = $v;
                     return $arr[$key];
                 }
             } else if ($s == '`') {
                 if (preg_match('/' . substr($key, 1, -1) . '/', $v)) {
-                    self::$args[] = $v;
+                    $this->httpRequest->args[] = $v;
                     return $arr[$key];
                 }
             }
@@ -131,17 +112,17 @@ class Router
         return null;
     }
 
-    private static function getAction()
+    private function getAction()
     {
-        $info = self::matchRouter(self::$info, self::getKey());
+        $info = $this->matchRouter(self::$info, $this->getKey());
         if (!$info) {
-            throw new HttpException(self::$httpResponse,'Not Found',404);
+            throw new HttpException($this->httpResponse,'Not Found',404);
         }
         if (is_array($info)) {
             if (isset($info[0])) {
                 $info = $info[0];
             } else {
-                throw new HttpException(self::$httpResponse,'Not Found',404);
+                throw new HttpException($this->httpResponse,'Not Found',404);
             }
         }
         $fm = [];
@@ -162,20 +143,21 @@ class Router
     /**
      * 执行路由对应的方法
      */
-    public static function exec($request,$response)
+    public function exec($request,$response)
     {
-        self::$httpRequest = $request;
-        self::$httpResponse = $response;
+        $this->httpRequest = $request;
 
-        $fm = self::getAction();
+        $this->httpResponse = $response;
+
+        $fm = $this->getAction();
         $act = is_array($fm[0]) ? $fm[0]['use'] : $fm[0];
-        list(self::$class, self::$method) = explode('@', $act);
+        list($this->httpRequest->class, $this->httpRequest->method) = explode('@', $act);
         $r = [];
         foreach ($fm as $i => $v) {
             if ($i > 0) {
                 $r[] = function ($handler) use ($v) {
                     return function () use ($v, $handler) {
-                        return call($v, array_merge([$handler], self::$args));
+                        return call($v, [$handler,$this->httpResponse]);
                     };
                 };
             }
@@ -187,7 +169,7 @@ class Router
                 $ac = $fm[0]['use'];
                 if (isset($fm[0]['cache'])) {
                     $cache = $fm[0]['cache'];
-                    $key = md5($ac . ':' . implode(',', self::$args));
+                    $key = md5($ac . ':' . implode(',', $this->httpRequest->args));
                     $res = Cache::get($key);
                     if ($res) {
                         return $res;
@@ -198,8 +180,8 @@ class Router
             }
 
             $cl = explode('@', $ac);
-            $obj = new $cl[0](self::$httpRequest,self::$httpResponse);
-            $res = $obj->run($cl[1],self::$args);
+            $obj = new $cl[0]($this->httpRequest,$this->httpResponse);
+            $res = $obj->run($cl[1],$this->httpRequest->args);
 
             if ($cache) {
                 Cache::set($key, $res, $cache);
