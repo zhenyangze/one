@@ -3,6 +3,7 @@
 namespace One\Http;
 
 use One\Exceptions\HttpException;
+use One\Swoole\Protocol;
 
 class Controller
 {
@@ -16,11 +17,6 @@ class Controller
      * @var Response
      */
     protected $response = null;
-
-    /**
-     * @var null
-     */
-    private $session = null;
 
 
     /**
@@ -44,9 +40,9 @@ class Controller
     final public function run($action, $args = [])
     {
         if (method_exists($this, $action)) {
-            try{
+            try {
                 return $this->$action(...$args);
-            }catch (\Exception $e){
+            } catch (\Exception $e) {
                 $this->error($e->getMessage(), $e->getCode());
             }
         } else {
@@ -60,6 +56,14 @@ class Controller
     final protected function session()
     {
         return $this->response->session();
+    }
+
+    /**
+     * @return \swoole_websocket_server
+     */
+    final protected function server()
+    {
+        return Protocol::getServer();
     }
 
     /**
@@ -79,7 +83,7 @@ class Controller
      */
     final protected function json($data)
     {
-        return formatJson($data,0,$this->request->id());
+        return formatJson($data, 0, $this->request->id());
     }
 
     /**
@@ -89,7 +93,7 @@ class Controller
      */
     final protected function jsonP($data, $callback = 'callback')
     {
-        return $callback.'('.formatJson($data,0,$this->request->id()).')';
+        return $callback . '(' . formatJson($data, 0, $this->request->id()) . ')';
     }
 
     /**

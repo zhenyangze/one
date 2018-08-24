@@ -32,7 +32,7 @@ class Response
     public function session()
     {
         if (!$this->_session) {
-            $this->_session = new Session($this);
+            $this->_session = new \One\Swoole\Session($this);
         }
         return $this->_session;
     }
@@ -163,7 +163,7 @@ class Response
      */
     public function tpl($file, array $data = [])
     {
-        if ($this->getHttpRequest()->isAjax()) {
+        if ($this->getHttpRequest()->isJson()) {
             $this->header('Content-type', 'application/json');
             return formatJson($data, 0, $this->getHttpRequest()->id());
         } else {

@@ -188,9 +188,9 @@ class Request
     /**
      * @return bool
      */
-    public function isAjax()
+    public function isJson()
     {
-        if ($this->server('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest') {
+        if ($this->server('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest' || strpos($this->server('HTTP_ACCEPT'),'/json') !== false) {
             return true;
         } else {
             return false;
