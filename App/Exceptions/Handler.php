@@ -10,7 +10,7 @@ class Handler
     {
         $e->response->code($e->getCode());
 
-        if($e->response->getHttpRequest()->isAjax()){
+        if($e->response->getHttpRequest()->isJson()){
             return $e->response->json(formatJson($e->getMessage(),$e->getCode(),$e->response->getHttpRequest()->id()));
         }else{
             $file = _APP_PATH_VIEW_ . '/Exceptions/' . $e->getCode() . '.php';

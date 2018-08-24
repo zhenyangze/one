@@ -24,7 +24,9 @@ class TestHttpServer extends HttpServer
         }catch (\Exception $e) {
             $data = $e->getMessage();
         }
-        $response->write($data);
+        if($data){
+            $response->write($data);
+        }
         $response->end();
     }
 }
