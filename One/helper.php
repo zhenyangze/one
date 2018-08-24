@@ -154,3 +154,25 @@ function formatJson($data, $code, $id)
     }
     return json_encode($arr);
 }
+
+
+/**
+ * 设置数组的key
+ * @param $arr
+ * @param $key
+ * @param bool $unique
+ * @return array
+ */
+function setArrkey($arr, $key, $unique = true)
+{
+    $r = [];
+    foreach ($arr as $v) {
+        if ($unique) {
+            $r[$v[$key]] = $v;
+        } else {
+            $r[$v[$key]][] = $v;
+        }
+    }
+    return $r;
+}
+

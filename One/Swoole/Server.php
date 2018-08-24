@@ -11,6 +11,19 @@ namespace One\Swoole;
 
 class Server
 {
+    protected $conf = [];
+
+    /**
+     * @var \swoole_websocket_server
+     */
+    protected $server = null;
+
+    public function __construct(\swoole_server $server,array $conf)
+    {
+        $this->server = $server;
+        $this->conf = $conf;
+    }
+
     public function onStart(\swoole_server $server)
     {
     }
