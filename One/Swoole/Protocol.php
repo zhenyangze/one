@@ -9,9 +9,11 @@
 namespace One\Swoole;
 
 
+use One\ConfigTrait;
+
 class Protocol
 {
-    protected static $conf = [];
+    use ConfigTrait;
 
     protected $i = 0;
 
@@ -22,13 +24,6 @@ class Protocol
     private static $_server = null;
 
 
-    public function __construct($server_type = self::SWOOLE_HTTP_SERVER)
-    {
-        $this->i = count(self::$conf);
-        $this->addConf('server_type', $server_type);
-        $this->ip()->port()->mode()->sockType();
-    }
-
     /**
      * 返回全局server
      * @return \swoole_websocket_server
@@ -38,66 +33,6 @@ class Protocol
         return self::$_server;
     }
 
-
-    /**
-     * 设置端口
-     * @param int $port
-     * @return Protocol
-     */
-    public function port($port = '9501')
-    {
-        return $this->addConf(__FUNCTION__, $port);
-    }
-
-    /**
-     * 运行的模式
-     * @param int $mode
-     * @return Protocol
-     */
-    public function mode($mode = SWOOLE_PROCESS)
-    {
-        return $this->addConf(__FUNCTION__, $mode);
-    }
-
-    /**
-     * 指定Socket的类型
-     * @param int $type
-     * @return Protocol
-     */
-    public function sockType($type = SWOOLE_SOCK_TCP)
-    {
-        return $this->addConf(__FUNCTION__, $type);
-    }
-
-    /**
-     * 设置swoole_server运行时的各项参数
-     * @param array $config
-     * @return Protocol
-     */
-    public function set(array $config)
-    {
-        return $this->addConf(__FUNCTION__, $config);
-    }
-
-    /**
-     * 设置ip
-     * @param string $ip
-     * @return Protocol
-     */
-    public function ip($ip = '0.0.0.0')
-    {
-        return $this->addConf(__FUNCTION__, $ip);
-    }
-
-    /**
-     * 当前协议运行的类
-     * @param string $action
-     * @return Protocol
-     */
-    public function action($action)
-    {
-        return $this->addConf(__FUNCTION__, $action);
-    }
 
     public static function runAll()
     {
@@ -130,7 +65,7 @@ class Protocol
 
         switch ($conf['server_type']) {
             case self::SWOOLE_WEBSOCKET_SERVER:
-                $server = new \swoole_websocket_server($conf['ip'], $conf['port'], $conf['mode'], $conf['sockType']);
+                $server = new \swoole_websocket_server($conf['ip'], $conf['port'], $conf['mode'], $conf['sock_type']);
                 break;
             case self::SWOOLE_HTTP_SERVER:
                 break;
@@ -199,12 +134,6 @@ class Protocol
                 exit;
             }
         }
-    }
-
-    private function addConf($key, $val)
-    {
-        self::$conf[$this->i][$key] = $val;
-        return $this;
     }
 }
 

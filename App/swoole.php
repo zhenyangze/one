@@ -15,7 +15,7 @@ require _APP_PATH_.'/config.php';
 
 \One\Http\Router::loadRouter();
 
-require _APP_PATH_.'/protocol.php';
+\One\Crypt\Openssl::setConfig(config('protocol'));
 
 \One\Swoole\Protocol::runAll();
 

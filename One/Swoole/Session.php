@@ -20,13 +20,20 @@ class Session
 
     private $prefix = 'session_';
 
-    public function __construct(Response $response)
+    /**
+     * Session constructor.
+     * @param null $response
+     * @param null $id session.id
+     */
+    public function __construct($response = null, $id = null)
     {
         $this->name = config('session.name');
 
-        $this->session_id = $response->getHttpRequest()->cookie($this->name);
-
-        if (!$this->session_id) {
+        if ($id) {
+            $this->session_id = $id;
+        } else if ($response) {
+            $this->session_id = $response->getHttpRequest()->cookie($this->name);
+        } else {
             $this->session_id = sha1(uuid());
         }
 
@@ -38,9 +45,16 @@ class Session
             $this->drive = new File();
         }
 
-        $response->cookie($this->name, $this->session_id, time() + $this->time, '/');
+        if ($response) {
+            $response->cookie($this->name, $this->session_id, time() + $this->time, '/');
+        }
 
         $this->data = $this->drive->get($this->prefix . $this->session_id);
+    }
+
+    public function getId()
+    {
+        return $this->session_id;
     }
 
     public function set($key, $val)
