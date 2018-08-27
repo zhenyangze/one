@@ -3,6 +3,7 @@
 namespace One\Http;
 
 use One\Exceptions\HttpException;
+use One\Facades\Log;
 use One\Swoole\Protocol;
 
 class Controller
@@ -28,6 +29,11 @@ class Controller
     {
         $this->request = $request;
         $this->response = $response;
+    }
+
+    public function __destruct()
+    {
+        Log::flushTraceId();
     }
 
     /**
