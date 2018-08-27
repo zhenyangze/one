@@ -36,7 +36,6 @@ class Protocol
 
     public static function runAll()
     {
-
         self::_check();
         $server = self::startServer(array_shift(self::$conf));
         echo "start server\n";
@@ -51,7 +50,7 @@ class Protocol
     {
         foreach (self::$conf as $conf) {
             $port = $server->addListener($conf['ip'], $conf['port'], $conf['mode']);
-            if (isset($conf['set'])) {
+            if (isset($conf['set']) && $conf['set']) {
                 $port->set($conf['set']);
             }
             self::onEvent($port, $conf['action'], $server, $conf);
