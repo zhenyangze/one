@@ -21,7 +21,7 @@ class TestHttpServer extends HttpServer
             $data = (new \One\Http\Router())->exec($req,$res);
         }catch (\One\Exceptions\HttpException $e){
             $data = (new \App\Exceptions\Handler())->render($e);
-        }catch (\Exception $e) {
+        }catch (\Throwable $e) {
             $data = $e->getMessage();
         }
         if($data){
