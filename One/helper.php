@@ -176,3 +176,13 @@ function setArrkey($arr, $key, $unique = true)
     return $r;
 }
 
+/**
+ * 创建协成id
+ * @param $call
+ * @return string 返回协成id
+ */
+function oneGo($call)
+{
+    return \One\Facades\Log::bindTraceId(go($call));
+}
+

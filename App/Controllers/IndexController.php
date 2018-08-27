@@ -9,7 +9,7 @@ class IndexController extends Controller
     public function index()
     {
 
-        return $this->json($this->request->server());
+        return $this->json(php_sapi_name());
     }
 
     public function test()

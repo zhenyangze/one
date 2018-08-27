@@ -69,8 +69,56 @@ class Log
 
         $code = $this->levels[$code];
 
-        $str = $code . '|' . date('Y-m-d H:i:s') . '|' . self::$conf['id'] . '|' . $name . ':' . $line . '|' . $data . "\n";
+        $trace_id = self::$conf['id'];
+
+        if(php_sapi_name() == 'cli' && class_exists('\Swoole\Coroutine')){
+            $cid = \Swoole\Coroutine::getuid();
+            if($cid > -1){
+                if(isset($this->_traceId[$cid])){
+                    $trace_id = $this->_traceId[$cid];
+                }else{
+                    //如果直接调用go创建协成这里获取不到id 所有创建协成请调用oneGo
+                    $this->warn('get trace_id fail : '.$cid);
+                }
+            }
+        }
+
+        $str = $code . '|' . date('Y-m-d H:i:s') . '|' . $trace_id . '|' . $name . ':' . $line . '|' . $data . "\n";
         error_log($str, 3, $path);
 
+    }
+
+    private $_traceId = [];
+
+    /**
+     * 在协成环境统一TraceId
+     * @param $id
+     * @return string
+     */
+    public function bindTraceId($id)
+    {
+        $pid = \Swoole\Coroutine::getuid();
+        if($pid == -1){
+            $this->warn('bindTraceId false : '.$id);
+        }
+        if(!isset($this->_traceId[$pid])){
+            $this->warn('bindTraceId get pid false : '.$pid);
+        }
+        $this->_traceId[$id] = $this->_traceId[$pid];
+        return $id;
+    }
+
+    /**
+     * 请求完成刷新 清除已经关闭的id
+     */
+    public function flushTraceId(){
+        $cids = \Swoole\Coroutine::listCoroutines();
+        $t = [];
+        foreach ($cids as $id){
+            if(isset($this->_traceId[$id])){
+                $t[$id] = $this->_traceId[$id];
+            }
+        }
+        $this->_traceId = $t;
     }
 }
