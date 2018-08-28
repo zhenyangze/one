@@ -65,7 +65,7 @@ class Controller
     }
 
     /**
-     * @return \swoole_websocket_server
+     * @return Protocol
      */
     final protected function server()
     {

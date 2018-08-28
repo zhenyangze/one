@@ -58,6 +58,7 @@ class Server
 
     public function onClose(\swoole_server $server, $fd, $reactor_id)
     {
+        Protocol::getServer()->unBindFd($fd);
     }
 
     public function onBufferFull(\swoole_server $server, $fd)
