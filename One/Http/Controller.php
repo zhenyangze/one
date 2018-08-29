@@ -33,7 +33,7 @@ class Controller
 
     public function __destruct()
     {
-        Log::flushTraceId();
+//        Log::flushTraceId();
     }
 
     /**

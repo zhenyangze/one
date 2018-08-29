@@ -11,6 +11,17 @@ use \One\Swoole\Protocol;
 
 return [
     [
+        'server_type' => Protocol::SWOOLE_WEBSOCKET_SERVER,
+        'port' => 8081,
+        'action' => \App\Protocol\TestWebSocket::class,
+        'mode' => SWOOLE_PROCESS,
+        'sock_type' => SWOOLE_SOCK_TCP,
+        'ip' => '0.0.0.0',
+        'set' => [
+            'worker_num' => 2,
+        ]
+    ],
+    [
         'server_type' => Protocol::SWOOLE_HTTP_SERVER,
         'port' => 8080,
         'action' => \App\Protocol\TestHttpServer::class,
@@ -19,13 +30,5 @@ return [
         'ip' => '0.0.0.0',
         'set' => []
     ],
-    [
-        'server_type' => Protocol::SWOOLE_WEBSOCKET_SERVER,
-        'port' => 8081,
-        'action' => \App\Protocol\TestWebSocket::class,
-        'mode' => SWOOLE_PROCESS,
-        'sock_type' => SWOOLE_SOCK_TCP,
-        'ip' => '0.0.0.0',
-        'set' => []
-    ],
+
 ];

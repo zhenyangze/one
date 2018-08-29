@@ -9,7 +9,12 @@ class IndexController extends Controller
     public function index()
     {
 
-        return $this->json(php_sapi_name());
+        $name = $this->request->get('name');
+        if($name){
+            $this->server()->pushByName($name,rand(1,100));
+        }
+        return $this->json(['self_id' => $this->server()->worker_pid,
+            'pids' => $this->server()->getWorkerPids(),'fd' => $this->server()->_fd_name]);
     }
 
     public function test()

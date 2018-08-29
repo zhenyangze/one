@@ -26,6 +26,9 @@ class Request extends \One\Http\Request
         $this->post = &$request->post;
         $this->files = &$request->files;
         $this->httpRequest = $request;
+        $this->post = $this->post??[];
+        $this->get = $this->get??[];
+        $this->cookie = $this->cookie??[];
         $this->request = $this->post + $this->get;
         $this->id = uuid();
     }

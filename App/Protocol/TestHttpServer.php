@@ -13,6 +13,7 @@ use One\Swoole\HttpServer;
 
 class TestHttpServer extends HttpServer
 {
+
     public function onRequest(\swoole_http_request $request, \swoole_http_response $response)
     {
         try{
@@ -22,7 +23,7 @@ class TestHttpServer extends HttpServer
         }catch (\One\Exceptions\HttpException $e){
             $data = (new \App\Exceptions\Handler())->render($e);
         }catch (\Throwable $e) {
-            $data = $e->getMessage();
+            $data = $e->getMessage().PHP_EOL.$e->getFile().PHP_EOL.$e->getLine();
         }
         if($data){
             $response->write($data);

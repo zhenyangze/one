@@ -4,6 +4,11 @@ namespace One\Cache;
 
 use One\ConfigTrait;
 
+/**
+ * Class Redis
+ * @package One\Cache
+ * @mixin \Redis
+ */
 class Redis extends Cache
 {
     use ConfigTrait;

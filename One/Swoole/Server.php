@@ -8,6 +8,7 @@
 
 namespace One\Swoole;
 
+use One\Cache\Redis;
 
 class Server
 {
@@ -18,7 +19,7 @@ class Server
      */
     protected $server = null;
 
-    public function __construct(\swoole_server $server,array $conf)
+    public function __construct(\swoole_server $server, array $conf)
     {
         $this->server = $server;
         $this->conf = $conf;
@@ -30,10 +31,22 @@ class Server
 
     public function onShutdown(\swoole_server $server)
     {
+
     }
 
     public function onWorkerStart(\swoole_server $server, $worker_id)
     {
+        if (!$server->taskworker) {
+            $redis = new Redis();
+            \swoole_process::signal(SIGUSR1, function ($signo) use ($redis){
+                $info = $redis->get('signal');
+                if (is_array($info) && count($info) > 2) {
+                    Protocol::getServer()->sendToAll($info);
+                }
+            });
+            Protocol::getServer()->setPid($worker_id,$server->worker_pid);
+            echo $server->worker_pid.PHP_EOL;
+        }
     }
 
     public function onWorkerStop(\swoole_server $server, $worker_id)

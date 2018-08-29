@@ -10,6 +10,7 @@ namespace One\Facades;
  * @mixin \Redis
  * @method string get($key, \Closure $closure = null, $ttl = 0, $tags = []) static
  * @method bool delRegex($key) static
+ * @method bool del($key) static
  * @method bool flush($tag) static
  * @method bool set($key, $val, $ttl = 0, $tags = []) static
  */

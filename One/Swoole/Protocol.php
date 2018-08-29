@@ -10,6 +10,7 @@ namespace One\Swoole;
 
 
 use One\ConfigTrait;
+use One\Facades\Cache;
 
 /**
  * Class Protocol
@@ -33,6 +34,7 @@ class Protocol
 
     private static $_pro = null;
 
+
     private function __construct()
     {
 
@@ -53,8 +55,18 @@ class Protocol
         }
     }
 
+    public $worker_id = 0;
+    public $worker_pid = 0;
 
-    private $_fd_name = [];
+    public function setPid($id, $pid)
+    {
+        $this->worker_id = $id;
+        $this->worker_pid = $pid;
+        $this->table()->set('worker_' . $id, ['id' => $pid]);
+    }
+
+
+    public $_fd_name = [];
 
     /**
      * 给fd绑定别名
@@ -68,10 +80,10 @@ class Protocol
 
     public function unBindFd($fd)
     {
-        foreach ($this->_fd_name as $name => $fds){
-            if(isset($fds[$name])){
+        foreach ($this->_fd_name as $name => $fds) {
+            if (isset($fds[$fd])) {
                 unset($this->_fd_name[$name][$fd]);
-                if(count($this->_fd_name[$name]) == 0){
+                if (count($this->_fd_name[$name]) == 0) {
                     unset($this->_fd_name[$name]);
                 }
                 return 1;
@@ -80,6 +92,26 @@ class Protocol
         return 0;
     }
 
+    /**
+     * @var \swoole_table
+     */
+    private static $_table = null;
+
+    private static function createTable()
+    {
+        $table = new \swoole_table(1024);
+        $table->column('id', \swoole_table::TYPE_INT, 4);       //1,2,4,8
+        $table->create();
+        self::$_table = $table;
+    }
+
+    /**
+     * @return \swoole_table
+     */
+    public function table()
+    {
+        return self::$_table;
+    }
 
     public function unBindName($name)
     {
@@ -90,9 +122,13 @@ class Protocol
      * @param $name
      * @return array
      */
-    private function getFd($name)
+    public function getFd($name)
     {
-        return array_keys($this->_fd_name[$name]);
+        if(isset($this->_fd_name[$name])){
+            return array_keys($this->_fd_name[$name]);
+        }else{
+            return [];
+        }
     }
 
 
@@ -122,8 +158,40 @@ class Protocol
         return $this->sendInfoByName($name, $data, 'push');
     }
 
-    private function sendInfoByName(...$params)
+    private $worker_pids = [];
+
+
+    public function getWorkerPids()
     {
+        if (!$this->worker_pids) {
+            if (isset(self::$_server->setting['worker_num'])) {
+                $count = self::$_server->setting['worker_num'];
+            } else {
+                $count = swoole_cpu_num();
+            }
+            $pids = [];
+            for ($i = 0; $i < $count; $i++) {
+                $pid = $this->table()->get('worker_' . $i);
+                if ($pid) {
+                    $pids[] = $pid['id'];
+                }
+            }
+            $this->worker_pids = $pids;
+        }
+        return $this->worker_pids;
+    }
+
+    public function sendToAll($params, $send_all = false)
+    {
+        if ($send_all) {
+            Cache::set('signal', $params, 10);
+            foreach ($this->getWorkerPids() as $pid) {
+                if($pid != $this->worker_pid){
+                    \swoole_process::kill($pid, SIGUSR1);
+                }
+            }
+        }
+
         $name = array_shift($params);
         $send_type = array_pop($params);
 
@@ -137,6 +205,12 @@ class Protocol
         } else {
             return false;
         }
+
+    }
+
+    private function sendInfoByName(...$params)
+    {
+        return $this->sendToAll($params, true);
     }
 
 
@@ -157,6 +231,7 @@ class Protocol
     {
         if (self::$_server === null) {
             self::_check();
+            self::createTable();
             $server = self::startServer(array_shift(self::$conf));
             echo "start server\n";
             self::addServer($server);
@@ -182,17 +257,16 @@ class Protocol
     private static function startServer($conf)
     {
         $server = null;
-
         switch ($conf['server_type']) {
             case self::SWOOLE_WEBSOCKET_SERVER:
                 $server = new \swoole_websocket_server($conf['ip'], $conf['port'], $conf['mode'], $conf['sock_type']);
                 break;
             case self::SWOOLE_HTTP_SERVER:
+                $server = new \swoole_http_server($conf['ip'], $conf['port'], $conf['mode'], $conf['sock_type']);
                 break;
-
             case self::SWOOLE_SERVER:
+                $server = new \swoole_server($conf['ip'], $conf['port'], $conf['mode'], $conf['sock_type']);
                 break;
-
             default:
                 echo "未知的服务类型\n";
                 exit;
@@ -202,13 +276,13 @@ class Protocol
             $server->set($conf['set']);
         }
 
-        self::onEvent($server, $conf['action'], $server, $conf);
+        self::onEvent($server, $conf['action'], $server, $conf, ['onClose', 'onWorkerStart']);
 
         return $server;
     }
 
 
-    private static function onEvent($self, $class, $server, $conf)
+    private static function onEvent($sev, $class, $server, $conf, $call = [])
     {
         $base = [
             Server::class => 1,
@@ -220,8 +294,6 @@ class Protocol
         $funcs = $rf->getMethods(\ReflectionMethod::IS_PUBLIC);
         $obj = new $class($server, $conf);
 
-        $call = ['onClose'];
-
         foreach ($funcs as $func) {
             if (!isset($base[$func->class])) {
                 if (substr($func->name, 0, 2) == 'on') {
@@ -230,8 +302,10 @@ class Protocol
             }
         }
 
-        foreach ($call as $f){
-            $self->on(substr($f, 2), [$obj, $f]);
+        $call = array_unique($call);
+
+        foreach ($call as $f) {
+            $sev->on(substr($f, 2), [$obj, $f]);
         }
 
     }
@@ -248,9 +322,6 @@ class Protocol
             exit;
         }
 
-        usort(self::$conf, function ($a, $b) {
-            return $a['server_type'] > $b['server_type'] ? -1 : 1;
-        });
         if (count(self::$conf) == 0) {
             echo "请配置服务信息\n";
             exit;
