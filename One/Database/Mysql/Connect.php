@@ -52,16 +52,7 @@ class Connect
     private function debugLog($sql, $build = [])
     {
         if (self::$conf['debug_log']) {
-            $info = explode('?',$sql);
-            foreach ($info as $i => &$v){
-                if(isset($build[$i])){
-                    $v = $v . "'{$build[$i]}'";
-                }
-            }
-            $s = implode('',$info);
-            $id = md5(str_replace(['?',','],'',$sql));
-
-            Log::debug(['sql' => $s,'id'=>$id],'sql',10);
+            Log::debug(['sql' => $sql,'data'=>$build],'sql',10);
         }
     }
 
@@ -206,7 +197,7 @@ class Connect
         try {
             return new \PDO($conf['dns'], $conf['username'], $conf['password'], $conf['ops']);
         } catch (\PDOException $e) {
-            throw new \DbException('connection failed ' . $e->getMessage(), 0);
+            throw new DbException('connection failed ' . $e->getMessage(), 0);
         }
     }
 

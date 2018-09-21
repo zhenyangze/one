@@ -95,7 +95,7 @@ class CacheBuild extends Build
         $table = $this->from;
         $key = $this->getCacheColumnValue();
         $hash = sha1($this->getSelectSql() . json_encode($this->build));
-        return "DB:{$table}{$key}:$hash";
+        return 'DB' . Cache::getDelimiter() . "{$table}{$key}" . Cache::getDelimiter() . $hash;
     }
 
     private function flushCache($data = [])
