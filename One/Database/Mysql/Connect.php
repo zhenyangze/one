@@ -197,7 +197,7 @@ class Connect
         try {
             return new \PDO($conf['dns'], $conf['username'], $conf['password'], $conf['ops']);
         } catch (\PDOException $e) {
-            throw new \DbException('connection failed ' . $e->getMessage(), 0);
+            throw new DbException('connection failed ' . $e->getMessage(), 0);
         }
     }
 
