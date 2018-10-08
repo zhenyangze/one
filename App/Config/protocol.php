@@ -17,7 +17,11 @@ return [
         'mode' => SWOOLE_PROCESS,
         'sock_type' => SWOOLE_SOCK_TCP,
         'ip' => '0.0.0.0',
-        'set' => []
+        'set' => [],
+        'global_data' => [
+            'ip' => '127.0.0.1',
+            'port' => 8080,
+        ]
     ],
     [
         'server_type' => Protocol::SWOOLE_WEBSOCKET_SERVER,
@@ -28,4 +32,9 @@ return [
         'ip' => '0.0.0.0',
         'set' => []
     ],
+    'run_global_data' => [
+        'ip' => '127.0.0.1',
+        'port' => 8080,
+    ]
 ];
+
