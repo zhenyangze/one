@@ -22,7 +22,7 @@ class TestWebSocket extends WebSocket
         try {
             $router = new Router();
             list($frame->class, $frame->method, $mids, $action, $frame->args) = $router->explain('ws', $info['uri'], [], $frame);
-            $f = $router->getExecAction($mids, $action, $frame);
+            $f = $router->getExecAction($mids, $action, $frame, $server);
             $data = $f();
         } catch (RouterException $e) {
             $data = $e->getMessage();
