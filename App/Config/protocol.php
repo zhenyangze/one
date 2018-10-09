@@ -13,7 +13,7 @@ return [
     [
         'server_type' => Protocol::SWOOLE_HTTP_SERVER,
         'port' => 8080,
-        'action' => \App\Protocol\TestHttpServer::class,
+        'action' => \App\Protocol\AppWebSocket::class,
         'mode' => SWOOLE_PROCESS,
         'sock_type' => SWOOLE_SOCK_TCP,
         'ip' => '0.0.0.0',
@@ -26,7 +26,7 @@ return [
     [
         'server_type' => Protocol::SWOOLE_WEBSOCKET_SERVER,
         'port' => 8081,
-        'action' => \App\Protocol\TestWebSocket::class,
+        'action' => \App\Protocol\AppHttpServer::class,
         'mode' => SWOOLE_PROCESS,
         'sock_type' => SWOOLE_SOCK_TCP,
         'ip' => '0.0.0.0',

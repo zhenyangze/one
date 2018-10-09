@@ -13,7 +13,7 @@ use One\Http\Router;
 use One\Http\RouterException;
 use One\Swoole\WebSocket;
 
-class TestWebSocket extends WebSocket
+class AppWebSocket extends WebSocket
 {
     public function onMessage(\swoole_server $server, \swoole_websocket_frame $frame)
     {

@@ -15,7 +15,7 @@ use One\Http\Router;
 use One\Http\RouterException;
 use One\Swoole\HttpServer;
 
-class TestHttpServer extends HttpServer
+class AppHttpServer extends HttpServer
 {
     public function onRequest(\swoole_http_request $request, \swoole_http_response $response)
     {
