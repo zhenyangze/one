@@ -33,7 +33,9 @@ class CacheBuild extends Build
     public function update($data)
     {
         $ret = parent::update($data);
-        $this->flushCache($data);
+        if($this->isIgnoreColumn($data) === false){
+            $this->flushCache($data);
+        }
         return $ret;
     }
 
@@ -64,6 +66,13 @@ class CacheBuild extends Build
     {
         sort($columns, SORT_STRING);
         $this->columns = $columns;
+    }
+
+    private $ignore_column = [];
+
+    public function ignoreColumn($columns)
+    {
+        $this->ignore_column = $columns;
     }
 
     private function getCacheColumnValue($data = [])
@@ -104,5 +113,15 @@ class CacheBuild extends Build
         $key = $this->getCacheColumnValue($data);
         Cache::delRegex("*#{$table}{$key}#*");
         Cache::flush('join+' . $table);
+    }
+
+    private function isIgnoreColumn($data)
+    {
+        foreach ($data as $k => $v) {
+            if (!in_array($k, $this->ignore_column)) {
+                return false;
+            }
+        }
+        return true;
     }
 }
