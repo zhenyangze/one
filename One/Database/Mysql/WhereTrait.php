@@ -6,10 +6,6 @@ trait WhereTrait
 {
     protected $where = [];
 
-    protected $and = ' and ';
-
-    protected $or = ' or ';
-
     /**
      * @param $key
      * @param null $operator
@@ -39,7 +35,7 @@ trait WhereTrait
     }
 
     /**
-     * @param $key
+     * @param string|array|\Closure $key
      * @param null $operator
      * @param null $val
      * @return $this
