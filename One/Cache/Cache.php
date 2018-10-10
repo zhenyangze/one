@@ -20,11 +20,6 @@ abstract class Cache
 
     abstract public function del($key);
 
-    public function getDelimiter()
-    {
-        return ':';
-    }
-
     protected function getTagKey($key, $tags = [])
     {
         if ($tags) {
@@ -36,7 +31,7 @@ abstract class Cache
                 }
                 $prev = md5($p . $prev);
             }
-            return static::$conf['prefix'] . $key . $this->getDelimiter() . 'tag_' . $prev;
+            return static::$conf['prefix'] . $key .  '#tag_' . $prev;
         } else {
             return static::$conf['prefix'] . $key;
         }

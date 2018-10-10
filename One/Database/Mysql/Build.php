@@ -11,6 +11,8 @@ class Build
 
     private $columns = [];
 
+    private $model_name = '';
+
     protected $build = [];
 
     private $connect;
@@ -24,7 +26,8 @@ class Build
     {
         $this->from = $table;
         $this->model = $model;
-        $this->connect = new Connect($connection, $model_name);
+        $this->model_name = $model_name;
+        $this->connect = new Connect($connection, $this->model_name);
     }
 
     private $withs = [];
@@ -103,7 +106,7 @@ class Build
     {
         $info = $this->getData(true);
         $ret = new ListModel($info);
-        if($info){
+        if ($info) {
             $ret = $this->fillSelectWith($ret, 'setRelationList');
         }
         return $ret;
@@ -182,6 +185,16 @@ class Build
     public function getConnect()
     {
         return $this->connect;
+    }
+
+    /**
+     * @param $key
+     * @return $this
+     */
+    public function setConnection($key)
+    {
+        $this->connect = new Connect($key, $this->model_name);
+        return $this;
     }
 
     /**
@@ -286,7 +299,7 @@ class Build
      * @param int $skip
      * @return $this
      */
-    public function limit(int $limit, $skip = 0)
+    public function limit($limit, $skip = 0)
     {
         $this->limit = $skip . ',' . $limit;
         return $this;
@@ -301,7 +314,7 @@ class Build
         return $where;
     }
 
-    public function defaultColumn()
+    private function defaultColumn()
     {
         if (method_exists($this->model, __FUNCTION__)) {
             return $this->model->defaultColumn();
@@ -417,8 +430,8 @@ class Build
     {
         if (method_exists($this->model->relation(), $name)) {
             return $this->model->relation()->$name(...$arguments);
-        }else{
-            throw new DbException('Undefined method '.$name);
+        } else {
+            throw new DbException('Undefined method ' . $name);
         }
     }
 

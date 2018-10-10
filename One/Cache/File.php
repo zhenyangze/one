@@ -13,11 +13,6 @@ class File extends Cache
         $this->mkdir();
     }
 
-    public function getDelimiter()
-    {
-        return '_';
-    }
-
     private function mkdir()
     {
         if (!is_dir(self::$conf['path'])) {

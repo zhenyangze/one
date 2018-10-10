@@ -11,7 +11,6 @@ namespace One\Facades;
  * @method string get($key, \Closure $closure = null, $ttl = 0, $tags = []) static
  * @method bool delRegex($key) static
  * @method bool flush($tag) static
- * @method string getDelimiter() static
  * @method bool set($key, $val, $ttl = 0, $tags = []) static
  */
 class Cache extends Facade
