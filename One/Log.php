@@ -86,14 +86,16 @@ class Log
      */
     public function bindTraceId($id)
     {
-        $pid = \Swoole\Coroutine::getuid();
-        if ($pid == -1) {
-            $this->warn('bindTraceId false : ' . $id);
+        if(class_exists('\Swoole\Coroutine')) {
+            $pid = \Swoole\Coroutine::getuid();
+            if ($pid == -1) {
+                $this->warn('bindTraceId false : ' . $id);
+            }
+            if (!isset($this->_traceId[$pid])) {
+                $this->warn('bindTraceId get pid false : ' . $pid);
+            }
+            $this->_traceId[$id] = $this->_traceId[$pid];
         }
-        if (!isset($this->_traceId[$pid])) {
-            $this->warn('bindTraceId get pid false : ' . $pid);
-        }
-        $this->_traceId[$id] = $this->_traceId[$pid];
         return $id;
     }
 
@@ -102,14 +104,16 @@ class Log
      */
     public function flushTraceId()
     {
-        $cids = \Swoole\Coroutine::listCoroutines();
-        $t = [];
-        foreach ($cids as $id) {
-            if (isset($this->_traceId[$id])) {
-                $t[$id] = $this->_traceId[$id];
+        if(class_exists('\Swoole\Coroutine')){
+            $cids = \Swoole\Coroutine::listCoroutines();
+            $t = [];
+            foreach ($cids as $id) {
+                if (isset($this->_traceId[$id])) {
+                    $t[$id] = $this->_traceId[$id];
+                }
             }
+            $this->_traceId = $t;
         }
-        $this->_traceId = $t;
     }
 
 

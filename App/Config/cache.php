@@ -1,6 +1,6 @@
 <?php
 return [
-    'drive' => 'Redis', // File | Redis
+    'drive' => 'File', // File | Redis
 
     'file' => [
         'path' => _APP_PATH_ . '/RunCache/cache',

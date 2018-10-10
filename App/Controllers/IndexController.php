@@ -8,15 +8,12 @@ class IndexController extends Controller
 {
     public function index()
     {
-
-        return $this->json(php_sapi_name());
+        return $this->json($this->request->userAgent());
     }
 
-    public function test()
+    public function test($id1,$id2)
     {
-        $r = $this->session()->get('a');
-        $this->session()->set('a',$r + 1);
-        return $r;
+        return $this->json([$id1,$id2]);
     }
 
 }

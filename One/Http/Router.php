@@ -86,11 +86,11 @@ class Router
                 }
                 if ($_k == 'id') {
                     if (is_numeric($v)) {
-                        $this->args[$_k] = $v;
+                        $this->args[] = $v;
                         return $arr[$key];
                     }
                 } else {
-                    $this->args[$_k] = $v;
+                    $this->args[] = $v;
                     return $arr[$key];
                 }
             } else if ($s == '`') {
@@ -149,8 +149,9 @@ class Router
             }
         }
 
-        $action = function () use ($info, $class, $fun, $other_args) {
+        $funcs = array_reverse($funcs);
 
+        $action = function () use ($info, $class, $fun, $other_args) {
             $cache = 0;
             if (is_array($info[0]) && isset($info[0]['cache'])) {
                 $cache = $info[0]['cache'];
