@@ -34,25 +34,40 @@ class Connect
      */
     public function execute($sql, $data = [], $retry = true)
     {
-        $this->debugLog($sql,$data);
+        $time = microtime(true);
         $res = $this->getPdo()->prepare($sql, [\PDO::ATTR_CURSOR => \PDO::CURSOR_SCROLL]);
         if (!$res) {
-            throw new DbException(json_encode(['info' => $this->getPdo()->errorInfo(), 'sql' => $sql]), 7);
+            $err = $this->getPdo()->errorInfo();
+            $this->debugLog($sql, $time, $data, $err);
+            throw new DbException(json_encode(['info' => $err, 'sql' => $sql]), 7);
         }
         $res->setFetchMode(\PDO::FETCH_CLASS, $this->model);
         if (!$res->execute($data)) {
             if ($this->isBreak($res->errorInfo()[2]) && $retry) {
                 return $this->close()->execute($sql, $data, false);
             }
-            throw new DbException(json_encode(['info' => $res->errorInfo(), 'sql' => $sql]), 7);
+            $err = $res->errorInfo();
+            $this->debugLog($sql, $time, $data, $err);
+            throw new DbException(json_encode(['info' => $err, 'sql' => $sql]), 7);
         }
+        $this->debugLog($sql, $time, $data);
         return $res;
     }
 
-    private function debugLog($sql, $build = [])
+    private function debugLog($sql, $time = 0, $build = [], $err = [])
     {
         if (self::$conf['debug_log']) {
-            Log::debug(['sql' => $sql,'data'=>$build],'sql',10);
+            $time = $time ? (microtime(true) - $time) * 1000 : $time;
+            $info = explode('?', $sql);
+            foreach ($info as $i => &$v) {
+                if (isset($build[$i])) {
+                    $v = $v . "'{$build[$i]}'";
+                }
+            }
+            $s = implode('', $info);
+            $id = md5(str_replace(['?', ','], '', $sql));
+
+            Log::debug(['sql' => $s, 'id' => $id, 'time' => $time, 'err' => $err], 'sql', 10);
         }
     }
 
