@@ -13,7 +13,7 @@ class IndexController extends Controller
 
     public function test($id1,$id2)
     {
-        return $this->json([$id1,$id2]);
+        return "\n".__METHOD__.'-> id1='.$id1.' '.'id2='.$id2.' time='.date('Y-m-d H:i:s')."\n";
     }
 
 }
