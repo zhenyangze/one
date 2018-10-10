@@ -9,23 +9,30 @@
 namespace App\Middle;
 
 
-
 class TestMiddle
 {
-    public function a($next,$response)
+    public function a($next, $response)
     {
-//        print_r($response->getHttpRequest());
-        return "\n".__METHOD__.$next().__METHOD__."\n";
+        if ($response->getHttpRequest()->args[0] <= 1) {
+            return 'id 必须大于 1';
+        }
+        return "\n" . __METHOD__ . $next() . __METHOD__ . "\n";
     }
 
-    public function b($next,$response)
+    public function b($next, $response)
     {
-        return "\n".__METHOD__.$next().__METHOD__."\n";
+        if ($response->getHttpRequest()->args[0] <= 2) {
+            return "\n" . 'id 必须大于 2' . "\n";
+        }
+        return "\n" . __METHOD__ . $next() . __METHOD__ . "\n";
 
     }
 
-    public function c($next,$response)
+    public function c($next, $response)
     {
-        return "\n".__METHOD__.$next().__METHOD__."\n";
+        if ($response->getHttpRequest()->args[0] <= 3) {
+            return "\n" . 'id 必须大于 3' . "\n";
+        }
+        return "\n" . __METHOD__ . $next() . __METHOD__ . "\n";
     }
 }
