@@ -135,7 +135,7 @@ class Request
      * @param $key
      * @return mixed|null
      */
-    public function cookie($key, $default = null)
+    public function cookie($key = null, $default = null)
     {
         return $this->getFromArr($this->cookie, $key, $default);
     }

@@ -8,6 +8,7 @@ class IndexController extends Controller
 {
     public function index()
     {
+<<<<<<< HEAD
 
         $name = $this->request->get('name');
         if($name){
@@ -15,13 +16,14 @@ class IndexController extends Controller
         }
         return $this->json(['self_id' => $this->server()->worker_pid,
             'pids' => $this->server()->getWorkerPids(),'fd' => $this->server()->_fd_name]);
+=======
+        return $this->json($this->request->userAgent());
+>>>>>>> 974c908ed80bd93e9eb79416b61c2a9eed6cf119
     }
 
-    public function test()
+    public function test($id1,$id2)
     {
-        $r = $this->session()->get('a');
-        $this->session()->set('a',$r + 1);
-        return $r;
+        return "\n".__METHOD__.'-> id1='.$id1.' '.'id2='.$id2.' time='.date('Y-m-d H:i:s')."\n";
     }
 
 }

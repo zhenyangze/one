@@ -11,6 +11,8 @@ class Build
 
     private $columns = [];
 
+    private $model_name = '';
+
     protected $build = [];
 
     private $connect;
@@ -24,7 +26,8 @@ class Build
     {
         $this->from = $table;
         $this->model = $model;
-        $this->connect = new Connect($connection, $model_name);
+        $this->model_name = $model_name;
+        $this->connect = new Connect($connection, $this->model_name);
     }
 
     private $withs = [];
@@ -103,7 +106,7 @@ class Build
     {
         $info = $this->getData(true);
         $ret = new ListModel($info);
-        if($info){
+        if ($info) {
             $ret = $this->fillSelectWith($ret, 'setRelationList');
         }
         return $ret;
@@ -177,11 +180,21 @@ class Build
     }
 
     /**
-     * @return Connect
+     * @return \PDO
      */
     public function getConnect()
     {
-        return $this->connect;
+        return $this->connect->getPdo();
+    }
+
+    /**
+     * @param $key
+     * @return $this
+     */
+    public function setConnection($key)
+    {
+        $this->connect = new Connect($key, $this->model_name);
+        return $this;
     }
 
     /**
@@ -241,7 +254,7 @@ class Build
 
     /**
      * @param string $table
-     * @param string $first
+     * @param string|\Closure $first
      * @param string $second
      * @param string $type
      * @return $this
@@ -255,7 +268,7 @@ class Build
         return $this;
     }
 
-    private $group_by = '';
+    private $group_by = [];
 
     /**
      * @param string $group_by
@@ -263,7 +276,7 @@ class Build
      */
     public function groupBy($group_by)
     {
-        $this->group_by = $group_by;
+        $this->group_by[] = $group_by;
         return $this;
     }
 
@@ -286,11 +299,73 @@ class Build
      * @param int $skip
      * @return $this
      */
-    public function limit(int $limit, $skip = 0)
+    public function limit($limit, $skip = 0)
     {
         $this->limit = $skip . ',' . $limit;
         return $this;
     }
+
+    private $having = [];
+
+    /**
+     * @param $key
+     * @param null $operator
+     * @param null $val
+     * @param string $link
+     * @return $this
+     */
+    public function having($key, $operator = null, $val = null, $link = ' and ')
+    {
+        if ($key instanceof \Closure) {
+            $this->having[] = [null, '(', null, $link];
+            $key($this);
+            $this->having[] = [null, ')'];
+        } else if ($val === null) {
+            $val = $operator;
+            $operator = '=';
+        }
+        $this->having[] = [$key, $operator, $val, $link];
+        return $this;
+    }
+
+    /**
+     * @param $key
+     * @param null $operator
+     * @param null $val
+     * @return $this
+     */
+    public function havingOr($key, $operator = null, $val = null)
+    {
+        return $this->having($key, $operator, $val, ' or ');
+    }
+
+
+    private function getHaving()
+    {
+        $prev = null;
+        $data = [];
+        $sql = '';
+        foreach ($this->having as $v) {
+            if ($prev && isset($v[3])) {
+                $sql .= $v[3];
+            }
+            if ($v[0] === null) {
+                $sql .= $v[1];
+            } else {
+                $data[] = $v[2];
+                $sql .= $v[0] . $v[1] . '?';
+            }
+            if (isset($v[3])) {
+                $prev = $v[0];
+            }
+        }
+        if($sql){
+            return [$data,' having '.$sql];
+        }else{
+            return [$data,''];
+        }
+    }
+
 
     private function getWhere()
     {
@@ -301,7 +376,7 @@ class Build
         return $where;
     }
 
-    public function defaultColumn()
+    private function defaultColumn()
     {
         if (method_exists($this->model, __FUNCTION__)) {
             return $this->model->defaultColumn();
@@ -329,6 +404,14 @@ class Build
             $sql .= ' ' . $v;
         }
         $sql .= $this->getWhere();
+        if ($this->group_by) {
+            $sql .= ' group by ' . implode(',', $this->group_by);
+        }
+        if($this->build){
+            list($d,$s) = $this->getHaving();
+            $sql .= $s;
+            $this->build = array_merge($this->build,$d);
+        }
         if ($this->order_by) {
             $sql .= ' order by ' . implode(',', $this->order_by);
         }
@@ -337,6 +420,7 @@ class Build
         }
         return $sql;
     }
+
 
     private function getInsertSql($data, $is_mulit = false)
     {
@@ -417,8 +501,8 @@ class Build
     {
         if (method_exists($this->model->relation(), $name)) {
             return $this->model->relation()->$name(...$arguments);
-        }else{
-            throw new DbException('Undefined method '.$name);
+        } else {
+            throw new DbException('Undefined method ' . $name);
         }
     }
 

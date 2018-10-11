@@ -37,26 +37,6 @@ class Controller
     }
 
     /**
-     * 执行控制器方法
-     * @param $action
-     * @param array $args
-     * @throws HttpException
-     * @return string
-     */
-    final public function run($action, $args = [])
-    {
-        if (method_exists($this, $action)) {
-            try {
-                return $this->$action(...$args);
-            } catch (\Exception $e) {
-                $this->error($e->getMessage(), $e->getCode());
-            }
-        } else {
-            $this->error('not find', 404);
-        }
-    }
-
-    /**
      * @return Session
      */
     final protected function session()

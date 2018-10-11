@@ -22,6 +22,8 @@ class Model extends ArrayModel
 
     protected $_cache_column = [];
 
+    protected $_ignore_flush_cache_column = [];
+
     protected $_relation = null;
 
     CONST TABLE = '';
@@ -48,6 +50,9 @@ class Model extends ArrayModel
         }
         if ($this->_cache_column) {
             $this->_build->cacheColumn($this->_cache_column);
+        }
+        if ($this->_ignore_flush_cache_column) {
+            $this->_build->ignoreColumn($this->_ignore_flush_cache_column);
         }
         return $this->_build;
     }

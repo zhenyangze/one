@@ -6,7 +6,7 @@ use One\Exceptions\HttpException;
 
 class Handler
 {
-    public function render(HttpException $e)
+    public static function render(HttpException $e)
     {
         $e->response->code($e->getCode());
 

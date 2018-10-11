@@ -86,6 +86,7 @@ function array_get_not_null($arr, $keys)
 function uuid($prefix = '')
 {
     $str = uniqid('', true);
+    return $str;
     $arr = explode('.', $str);
     $str = $prefix . base_convert($arr[0], 16, 36) . base_convert($arr[1], 10, 36) . base_convert(bin2hex(random_bytes(5)), 16, 36);
     $len = 24;

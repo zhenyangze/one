@@ -46,7 +46,7 @@ class Redis extends Cache
             $val = $closure();
             $this->set($key, $val, $ttl, $tags);
         }else if($val){
-            $val = igbinary_unserialize($val);
+            $val = unserialize($val);
         }
         return $val;
     }
@@ -56,7 +56,7 @@ class Redis extends Cache
         if(is_string($key)){
             $key = self::$conf['prefix'].$key;
         }
-        $this->driver->del($key);
+       return $this->driver->del($key);
     }
 
     public function delRegex($key)
@@ -73,7 +73,7 @@ class Redis extends Cache
 
     public function set($key, $val, $ttl = null, $tags = [])
     {
-        $this->driver->set($this->getTagKey($key, $tags), igbinary_serialize($val), $ttl);
+        $this->driver->set($this->getTagKey($key, $tags), serialize($val), $ttl);
     }
 
 }

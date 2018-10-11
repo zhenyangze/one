@@ -15,15 +15,7 @@ class Router
 
     public static $as_info = [];
 
-    /**
-     * @var null|Request
-     */
-    private $httpRequest = null;
-
-    /**
-     * @var null|Response
-     */
-    private $httpResponse = null;
+    private $args = [];
 
 
     public static function loadRouter()
@@ -42,10 +34,9 @@ class Router
     /**
      * @return string
      */
-    private function getKey()
+    private function getKey($method, $uri)
     {
-        $method = $this->httpRequest->method();
-        $paths = explode('/', $this->httpRequest->uri());
+        $paths = explode('/', $uri);
         foreach ($paths as $i => $v) {
             if (is_numeric($v)) {
                 $paths[$i] = '#' . $v;
@@ -95,16 +86,16 @@ class Router
                 }
                 if ($_k == 'id') {
                     if (is_numeric($v)) {
-                        $this->httpRequest->args[$_k] = $v;
+                        $this->args[] = $v;
                         return $arr[$key];
                     }
                 } else {
-                    $this->httpRequest->args[$_k] = $v;
+                    $this->args[] = $v;
                     return $arr[$key];
                 }
             } else if ($s == '`') {
                 if (preg_match('/' . substr($key, 1, -1) . '/', $v)) {
-                    $this->httpRequest->args[] = $v;
+                    $this->args[] = $v;
                     return $arr[$key];
                 }
             }
@@ -112,17 +103,17 @@ class Router
         return null;
     }
 
-    private function getAction()
+    private function getAction($method, $uri)
     {
-        $info = $this->matchRouter(self::$info, $this->getKey());
+        $info = $this->matchRouter(self::$info, $this->getKey($method, $uri));
         if (!$info) {
-            throw new HttpException($this->httpResponse,'Not Found',404);
+            throw new RouterException('Not Found', 404);
         }
         if (is_array($info)) {
             if (isset($info[0])) {
                 $info = $info[0];
             } else {
-                throw new HttpException($this->httpResponse,'Not Found',404);
+                throw new RouterException('Not Found', 404);
             }
         }
         $fm = [];
@@ -139,68 +130,62 @@ class Router
         return $fm;
     }
 
-
-    /**
-     * 执行路由对应的方法
-     */
-    public function exec($request,$response)
+    public function explain($method, $uri, ...$other_args)
     {
-        $this->httpRequest = $request;
+        $info = $this->getAction($method, $uri);
 
-        $this->httpResponse = $response;
+        $str = is_array($info[0]) ? $info[0]['use'] : $info[0];
+        list($class, $fun) = explode('@', $str);
 
-        $fm = $this->getAction();
-        $act = is_array($fm[0]) ? $fm[0]['use'] : $fm[0];
-        list($this->httpRequest->class, $this->httpRequest->method) = explode('@', $act);
-        $r = [];
-        foreach ($fm as $i => $v) {
+        $funcs = [];
+        foreach ($info as $i => $v) {
             if ($i > 0) {
-                $r[] = function ($handler) use ($v) {
-                    return function () use ($v, $handler) {
-                        return call($v, [$handler,$this->httpResponse]);
+                $funcs[] = function ($handler, ...$args) use ($v) {
+                    return function () use ($v, $handler, $args) {
+                        array_unshift($args, $handler);
+                        return call($v, $args);
                     };
                 };
             }
         }
 
-        $action = function () use ($fm) {
+        $funcs = array_reverse($funcs);
+
+        $action = function () use ($info, $class, $fun, $other_args) {
             $cache = 0;
-            if (is_array($fm[0])) {
-                $ac = $fm[0]['use'];
-                if (isset($fm[0]['cache'])) {
-                    $cache = $fm[0]['cache'];
-                    $key = md5($ac . ':' . implode(',', $this->httpRequest->args));
-                    $res = Cache::get($key);
-                    if ($res) {
-                        return $res;
-                    }
+            if (is_array($info[0]) && isset($info[0]['cache'])) {
+                $cache = $info[0]['cache'];
+                $key = md5($class . '@' . $fun . ':' . implode(',', $this->args));
+                $res = Cache::get($key);
+                if ($res) {
+                    return $res;
                 }
-            } else {
-                $ac = $fm[0];
             }
 
-            $cl = explode('@', $ac);
-            $obj = new $cl[0]($this->httpRequest,$this->httpResponse);
-            $res = $obj->run($cl[1],$this->httpRequest->args);
-
+            $obj = new $class(...$other_args);
+            if (!method_exists($obj, $fun)) {
+                throw new RouterException('method not exists', 404);
+            }
+            $res = $obj->$fun(...$this->args);
             if ($cache) {
                 Cache::set($key, $res, $cache);
             }
             return $res;
         };
 
-        $run = self::runBox($action, $r);
-        return $run();
+        return [$class, $fun, $funcs, $action, $this->args];
+
     }
 
 
-    private static function runBox($handler, $box)
+    public function getExecAction($mids, $action, ...$args)
     {
-        foreach ($box as $fn) {
-            $handler = $fn($handler);
+        foreach ($mids as $fn) {
+            $action = $fn($action, ...$args);
         }
-        return $handler;
+        return $action;
     }
+
 
     private static $group_info = [];
     private static $max_group_depth = 200;
@@ -262,7 +247,7 @@ class Router
     }
 
 
-    private static function set($method, $path, $action)
+    public static function set($method, $path, $action)
     {
         foreach (self::$group_info as $value) {
             $action = self::withGroupAction($value, $action);

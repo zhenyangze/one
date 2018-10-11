@@ -33,7 +33,9 @@ class CacheBuild extends Build
     public function update($data)
     {
         $ret = parent::update($data);
-        $this->flushCache($data);
+        if($this->isIgnoreColumn($data) === false){
+            $this->flushCache($data);
+        }
         return $ret;
     }
 
@@ -53,7 +55,7 @@ class CacheBuild extends Build
 
     public function join($table, $first, $second = null, $type = 'inner')
     {
-        $this->cache_tag[] = 'join:' . $table;
+        $this->cache_tag[] = 'join+' . $table;
         return parent::join($table, $first, $second, $type);
     }
 
@@ -64,6 +66,13 @@ class CacheBuild extends Build
     {
         sort($columns, SORT_STRING);
         $this->columns = $columns;
+    }
+
+    private $ignore_column = [];
+
+    public function ignoreColumn($columns)
+    {
+        $this->ignore_column = $columns;
     }
 
     private function getCacheColumnValue($data = [])
@@ -84,7 +93,7 @@ class CacheBuild extends Build
                 }
             }
             if ($keys) {
-                return '-' . implode(':', $keys);
+                return '-' . implode('+', $keys);
             }
         }
         return '';
@@ -95,14 +104,24 @@ class CacheBuild extends Build
         $table = $this->from;
         $key = $this->getCacheColumnValue();
         $hash = sha1($this->getSelectSql() . json_encode($this->build));
-        return "DB:{$table}{$key}:$hash";
+        return "DB#{$table}{$key}#{$hash}";
     }
 
     private function flushCache($data = [])
     {
         $table = $this->from;
         $key = $this->getCacheColumnValue($data);
-        Cache::delRegex("*:{$table}{$key}:*");
-        Cache::flush('join:' . $table);
+        Cache::delRegex("*#{$table}{$key}#*");
+        Cache::flush('join+' . $table);
+    }
+
+    private function isIgnoreColumn($data)
+    {
+        foreach ($data as $k => $v) {
+            if (!in_array($k, $this->ignore_column)) {
+                return false;
+            }
+        }
+        return true;
     }
 }
