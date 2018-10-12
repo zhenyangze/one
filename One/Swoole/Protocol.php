@@ -124,9 +124,9 @@ class Protocol
      */
     public function getFd($name)
     {
-        if(isset($this->_fd_name[$name])){
+        if (isset($this->_fd_name[$name])) {
             return array_keys($this->_fd_name[$name]);
-        }else{
+        } else {
             return [];
         }
     }
@@ -186,7 +186,7 @@ class Protocol
         if ($send_all) {
             Cache::set('signal', $params, 10);
             foreach ($this->getWorkerPids() as $pid) {
-                if($pid != $this->worker_pid){
+                if ($pid != $this->worker_pid) {
                     \swoole_process::kill($pid, SIGUSR1);
                 }
             }
@@ -227,16 +227,20 @@ class Protocol
     }
 
 
+    private static function e($str)
+    {
+        echo $str . "\n";
+    }
+
     public static function runAll()
     {
         if (self::$_server === null) {
             self::_check();
             self::createTable();
-            $server = self::startServer(array_shift(self::$conf));
-            echo "start server\n";
+            $server = self::startServer(self::$conf['server']);
             self::addServer($server);
-            echo "run all\n";
             self::$_server = $server;
+            self::e('server start');
             $server->start();
         }
     }
@@ -244,8 +248,12 @@ class Protocol
 
     private static function addServer(\swoole_server $server)
     {
-        foreach (self::$conf as $conf) {
+        if (!isset(self::$conf['add_listener'])) {
+            return false;
+        }
+        foreach (self::$conf['add_listener'] as $conf) {
             $port = $server->addListener($conf['ip'], $conf['port'], $conf['mode']);
+            self::e("addListener {$conf['ip']} {$conf['port']}");
             if (isset($conf['set']) && $conf['set']) {
                 $port->set($conf['set']);
             }
@@ -271,6 +279,13 @@ class Protocol
                 echo "未知的服务类型\n";
                 exit;
         }
+        $_server_name = [
+            self::SWOOLE_WEBSOCKET_SERVER => 'swoole_websocket_server',
+            self::SWOOLE_HTTP_SERVER => 'swoole_http_server',
+            self::SWOOLE_SERVER => 'swoole_server',
+        ];
+
+        self::e("server {$_server_name[$conf['server_type']]} {$conf['ip']} {$conf['port']}");
 
         if (isset($conf['set'])) {
             $server->set($conf['set']);
