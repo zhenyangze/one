@@ -36,17 +36,9 @@ class Server
 
     public function onWorkerStart(\swoole_server $server, $worker_id)
     {
-        if (!$server->taskworker) {
-            $redis = new Redis();
-            \swoole_process::signal(SIGUSR1, function ($signo) use ($redis){
-                $info = $redis->get('signal');
-                if (is_array($info) && count($info) > 2) {
-                    Protocol::getServer()->sendToAll($info);
-                }
-            });
-            Protocol::getServer()->setPid($worker_id,$server->worker_pid);
-            echo $server->worker_pid.PHP_EOL;
-        }
+        Protocol::getServer()->worker_id = $worker_id;
+        Protocol::getServer()->worker_pid = $server->worker_pid;
+        Protocol::getServer()->is_task = $server->taskworker ? true : false;
     }
 
     public function onWorkerStop(\swoole_server $server, $worker_id)

@@ -13,6 +13,7 @@ class GlobalData
     private $data = [];
 
     /**
+     * 设置
      * @param string $key
      * @param mixed $val
      * @return int
@@ -28,9 +29,9 @@ class GlobalData
             if (is_array($wr) && isset($wr[$v]) && ($i < $len - 1 && is_array($wr[$v]))) {
                 $wr = &$wr[$v];
             } else {
-                if($v){
+                if ($v) {
                     $wr[$v] = $this->join($br, $val);
-                }else{
+                } else {
                     $wr[] = $this->join($br, $val);
                 }
                 return 1;
@@ -45,9 +46,9 @@ class GlobalData
     private function join($arr, $v, $i = 0)
     {
         if (isset($arr[$i])) {
-            if($arr[$i]){
+            if ($arr[$i]) {
                 return [$arr[$i] => $this->join($arr, $v, $i + 1)];
-            }else{
+            } else {
                 return [$this->join($arr, $v, $i + 1)];
             }
         } else {
@@ -62,6 +63,7 @@ class GlobalData
 
 
     /**
+     * 获取
      * @param string $key
      * @return array|mixed|null
      */
@@ -69,10 +71,10 @@ class GlobalData
     {
         $ar = $this->toKeys($key);
         $wr = &$this->data;
-        foreach ($ar as $v){
+        foreach ($ar as $v) {
             if (is_array($wr) && isset($wr[$v])) {
                 $wr = &$wr[$v];
-            }else{
+            } else {
                 return null;
             }
         }
@@ -80,6 +82,7 @@ class GlobalData
     }
 
     /**
+     * 删除
      * @param string $key
      * @return int
      */
@@ -103,8 +106,64 @@ class GlobalData
             unset($wr[$k]);
         }
 
-        if(count($ar) > 0){
+        if (count($ar) > 0) {
             $this->_del($ar);
         }
     }
+
+
+    /**
+     * 给fd绑定别名
+     * @param $fd
+     */
+    public function bindName($fd, $name, $fd_key = 'fd', $name_key = 'name')
+    {
+        $this->set("{$name_key}-{$fd_key}.{$name}.{$fd}", time());
+        $this->set("{$fd_key}-{$name_key}.{$fd}", $name);
+    }
+
+    /**
+     * 解除绑定
+     * @param $fd
+     */
+    public function unBindFd($fd, $fd_key = 'fd', $name_key = 'name')
+    {
+        $name = $this->getNameByFd($fd, $fd_key, $name_key);
+        $this->del("{$name_key}-{$fd_key}.{$name}.{$fd}");
+        $this->del("{$fd_key}-{$name_key}.{$fd}");
+    }
+
+    /**
+     * 解除绑定
+     * @param $name
+     */
+    public function unBindName($name, $fd_key = 'fd', $name_key = 'name')
+    {
+        $fds = $this->get("{$name_key}-{$fd_key}.{$name}");
+        foreach ($fds as $fd => $v) {
+            $this->del("{$fd_key}-{$name_key}.{$fd}");
+        }
+        $this->del("{$name_key}-{$fd_key}.{$name}");
+    }
+
+    /**
+     * @param $name
+     * @return array
+     */
+    public function getFdByName($name, $fd_key = 'fd', $name_key = 'name')
+    {
+        $arr = $this->get("{$name_key}-{$fd_key}.{$name}");
+        return $arr ? $arr : [];
+    }
+
+
+    /**
+     * @param $name
+     * @return array
+     */
+    public function getNameByFd($fd, $fd_key = 'fd', $name_key = 'name')
+    {
+        return $this->get("{$fd_key}-{$name_key}.{$fd}");
+    }
+
 }

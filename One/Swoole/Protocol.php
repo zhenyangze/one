@@ -21,7 +21,10 @@ class Protocol
 {
     use ConfigTrait;
 
-    protected $i = 0;
+    public $worker_id = 0;
+    public $worker_pid = 0;
+    public $is_task = false;
+
 
     const SWOOLE_SERVER = 0;
     const SWOOLE_HTTP_SERVER = 1;
@@ -55,18 +58,13 @@ class Protocol
         }
     }
 
-    public $worker_id = 0;
-    public $worker_pid = 0;
-
-    public function setPid($id, $pid)
+    /**
+     * @return GlobalData
+     */
+    public function globalData()
     {
-        $this->worker_id = $id;
-        $this->worker_pid = $pid;
-        $this->table()->set('worker_' . $id, ['id' => $pid]);
+        return $a;
     }
-
-
-    public $_fd_name = [];
 
     /**
      * 给fd绑定别名
@@ -74,61 +72,35 @@ class Protocol
      */
     public function bindName($fd, $name)
     {
-        $this->_fd_name[$name][$fd] = 1;
+        $this->globalData()->bindName($fd, $name);
     }
 
-
+    /**
+     * 解除绑定
+     * @param $fd
+     */
     public function unBindFd($fd)
     {
-        foreach ($this->_fd_name as $name => $fds) {
-            if (isset($fds[$fd])) {
-                unset($this->_fd_name[$name][$fd]);
-                if (count($this->_fd_name[$name]) == 0) {
-                    unset($this->_fd_name[$name]);
-                }
-                return 1;
-            }
-        }
-        return 0;
+        $this->globalData()->unBindFd($fd);
     }
 
     /**
-     * @var \swoole_table
+     * 解除绑定
+     * @param $name
      */
-    private static $_table = null;
-
-    private static function createTable()
-    {
-        $table = new \swoole_table(1024);
-        $table->column('id', \swoole_table::TYPE_INT, 4);       //1,2,4,8
-        $table->create();
-        self::$_table = $table;
-    }
-
-    /**
-     * @return \swoole_table
-     */
-    public function table()
-    {
-        return self::$_table;
-    }
 
     public function unBindName($name)
     {
-        unset($this->_fd_name[$name]);
+        $this->globalData()->unBindName($name);
     }
 
     /**
      * @param $name
      * @return array
      */
-    public function getFd($name)
+    public function getFdByName($name)
     {
-        if (isset($this->_fd_name[$name])) {
-            return array_keys($this->_fd_name[$name]);
-        } else {
-            return [];
-        }
+        return $this->globalData()->getFdByName($name);
     }
 
 
@@ -150,7 +122,6 @@ class Protocol
     public function sendByName($name, $data)
     {
         return $this->sendInfoByName($name, $data, 'send');
-
     }
 
     public function pushByName($name, $data)
@@ -158,44 +129,11 @@ class Protocol
         return $this->sendInfoByName($name, $data, 'push');
     }
 
-    private $worker_pids = [];
-
-
-    public function getWorkerPids()
+    private function sendInfoByName(...$params)
     {
-        if (!$this->worker_pids) {
-            if (isset(self::$_server->setting['worker_num'])) {
-                $count = self::$_server->setting['worker_num'];
-            } else {
-                $count = swoole_cpu_num();
-            }
-            $pids = [];
-            for ($i = 0; $i < $count; $i++) {
-                $pid = $this->table()->get('worker_' . $i);
-                if ($pid) {
-                    $pids[] = $pid['id'];
-                }
-            }
-            $this->worker_pids = $pids;
-        }
-        return $this->worker_pids;
-    }
-
-    public function sendToAll($params, $send_all = false)
-    {
-        if ($send_all) {
-            Cache::set('signal', $params, 10);
-            foreach ($this->getWorkerPids() as $pid) {
-                if ($pid != $this->worker_pid) {
-                    \swoole_process::kill($pid, SIGUSR1);
-                }
-            }
-        }
-
         $name = array_shift($params);
         $send_type = array_pop($params);
-
-        $fds = $this->getFd($name);
+        $fds = $this->getFdByName($name);
         if ($fds) {
             foreach ($fds as $fd) {
                 if (self::$_server->exist($fd)) {
@@ -205,12 +143,6 @@ class Protocol
         } else {
             return false;
         }
-
-    }
-
-    private function sendInfoByName(...$params)
-    {
-        return $this->sendToAll($params, true);
     }
 
 
