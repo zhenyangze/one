@@ -20,7 +20,8 @@ return [
         'set' => [],
         'global_data' => [
             'ip' => '127.0.0.1',
-            'port' => 8080,
+            'port' => 8086,
+            'protocol' => \One\Protocol\Frame::class
         ]
     ],
     'add_listener' => [
@@ -34,7 +35,8 @@ return [
     ],
     'global_data_server' => [
         'ip' => '127.0.0.1',
-        'port' => 8080,
+        'port' => 8086,
+        'protocol' => \One\Protocol\Frame::class
     ]
 ];
 

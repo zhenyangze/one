@@ -8,11 +8,16 @@
 
 namespace One\Swoole;
 
-use One\Cache\Redis;
+use One\Protocol\ProtocolAbstract;
 
 class Server
 {
     protected $conf = [];
+
+    /**
+     * @var ProtocolAbstract
+     */
+    protected $protocol = null;
 
     /**
      * @var \swoole_websocket_server
@@ -23,6 +28,9 @@ class Server
     {
         $this->server = $server;
         $this->conf = $conf;
+        if (isset($conf['protocol'])) {
+            $this->protocol = new $conf['protocol'];
+        }
     }
 
     public function onStart(\swoole_server $server)
@@ -36,9 +44,9 @@ class Server
 
     public function onWorkerStart(\swoole_server $server, $worker_id)
     {
-        Protocol::getServer()->worker_id = $worker_id;
-        Protocol::getServer()->worker_pid = $server->worker_pid;
-        Protocol::getServer()->is_task = $server->taskworker ? true : false;
+        OneServer::getServer()->worker_id = $worker_id;
+        OneServer::getServer()->worker_pid = $server->worker_pid;
+        OneServer::getServer()->is_task = $server->taskworker ? true : false;
     }
 
     public function onWorkerStop(\swoole_server $server, $worker_id)
@@ -53,8 +61,20 @@ class Server
     {
     }
 
+    public final function __receive(\swoole_server $server, $fd, $reactor_id, $data)
+    {
+        if (isset($conf['protocol'])) {
+            $this->protocol->decode($data, $fd, function ($d) use ($server, $reactor_id, $fd) {
+                $this->onReceive($server, $fd, $reactor_id, $d);
+            });
+        } else {
+            $this->onReceive($server, $fd, $reactor_id, $data);
+        }
+    }
+
     public function onReceive(\swoole_server $server, $fd, $reactor_id, $data)
     {
+
     }
 
     public function onPacket(\swoole_server $server, $data, array $client_info)
@@ -63,7 +83,7 @@ class Server
 
     public function onClose(\swoole_server $server, $fd, $reactor_id)
     {
-        Protocol::getServer()->unBindFd($fd);
+        OneServer::getServer()->unBindFd($fd);
     }
 
     public function onBufferFull(\swoole_server $server, $fd)

@@ -17,7 +17,7 @@ use One\Facades\Cache;
  * @mixin \swoole_websocket_server
  * @package One\Swoole
  */
-class Protocol
+class OneServer
 {
     use ConfigTrait;
 
@@ -63,7 +63,10 @@ class Protocol
      */
     public function globalData()
     {
-        return $a;
+        static $g = null;
+        if($g === null){
+            $g = new GlobalData();
+        }
     }
 
     /**
@@ -223,7 +226,12 @@ class Protocol
             $server->set($conf['set']);
         }
 
-        self::onEvent($server, $conf['action'], $server, $conf, ['onClose', 'onWorkerStart']);
+        $e = ['onClose', 'onWorkerStart'];
+        if($conf['server_type'] == self::SWOOLE_SERVER){
+            $e[] = '__receive';
+        }
+
+        self::onEvent($server, $conf['action'], $server, $conf, $e);
 
         return $server;
     }
