@@ -113,8 +113,10 @@ class GlobalData
 
 
     /**
-     * 给fd绑定别名
      * @param $fd
+     * @param $name
+     * @param string $fd_key
+     * @param string $name_key
      */
     public function bindName($fd, $name, $fd_key = 'fd', $name_key = 'name')
     {
@@ -123,8 +125,9 @@ class GlobalData
     }
 
     /**
-     * 解除绑定
      * @param $fd
+     * @param string $fd_key
+     * @param string $name_key
      */
     public function unBindFd($fd, $fd_key = 'fd', $name_key = 'name')
     {
@@ -136,6 +139,8 @@ class GlobalData
     /**
      * 解除绑定
      * @param $name
+     * @param string $fd_key
+     * @param string $name_key
      */
     public function unBindName($name, $fd_key = 'fd', $name_key = 'name')
     {
@@ -148,6 +153,8 @@ class GlobalData
 
     /**
      * @param $name
+     * @param string $fd_key
+     * @param string $name_key
      * @return array
      */
     public function getFdByName($name, $fd_key = 'fd', $name_key = 'name')
@@ -158,8 +165,10 @@ class GlobalData
 
 
     /**
-     * @param $name
-     * @return array
+     * @param $fd
+     * @param string $fd_key
+     * @param string $name_key
+     * @return string
      */
     public function getNameByFd($fd, $fd_key = 'fd', $name_key = 'name')
     {

@@ -45,7 +45,7 @@ abstract class ProtocolAbstract
      * @param string $buf
      * @return string
      */
-    abstract protected function pack($buf);
+    abstract public function pack($buf);
 
 
 }

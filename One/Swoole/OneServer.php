@@ -10,7 +10,6 @@ namespace One\Swoole;
 
 
 use One\ConfigTrait;
-use One\Facades\Cache;
 
 /**
  * Class Protocol
@@ -171,7 +170,6 @@ class OneServer
     {
         if (self::$_server === null) {
             self::_check();
-            self::createTable();
             $server = self::startServer(self::$conf['server']);
             self::addServer($server);
             self::$_server = $server;
@@ -230,7 +228,6 @@ class OneServer
         if($conf['server_type'] == self::SWOOLE_SERVER){
             $e[] = '__receive';
         }
-
         self::onEvent($server, $conf['action'], $server, $conf, $e);
 
         return $server;
