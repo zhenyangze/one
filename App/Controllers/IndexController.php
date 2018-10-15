@@ -2,13 +2,15 @@
 
 namespace App\Controllers;
 
+use App\Model\User;
 use One\Http\Controller;
 
 class IndexController extends Controller
 {
     public function index()
     {
-        return $this->json($this->request->userAgent());
+        $res = User::where('user_id','<',123)->limit(2)->findAll();
+        return $this->json($res->toArray());
     }
 
     public function test($id1,$id2)

@@ -2,13 +2,14 @@
 
 namespace App\Model;
 
+use One\Database\Mysql\Build;
 use One\Database\Mysql\Model;
 
 class User extends Model
 {
     CONST TABLE = 'users';
 
-    protected $_cache_time = 100;
+    protected $_cache_time = 0;
 
     protected $_cache_column = ['user_id'];
 
@@ -18,8 +19,8 @@ class User extends Model
             'afterFind' => function ($ret) {
 
             },
-            'beforeFind' => function (& $a) {
-
+            'beforeFindAll' => function (Build $model, & $a) {
+                $model->where('user_id', 100);
             }
         ];
     }

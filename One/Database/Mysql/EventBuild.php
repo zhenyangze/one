@@ -12,6 +12,15 @@ class EventBuild extends CacheBuild
         $this->events = $this->model->events();
     }
 
+    protected function getData($all = false)
+    {
+        if ($this->callBefre(__FUNCTION__, $id) !== false) {
+            $ret = parent::getData($all);
+            $this->callAfter(__FUNCTION__, $ret, $id);
+            return $ret;
+        }
+    }
+
     public function find($id = null)
     {
         if ($this->callBefre(__FUNCTION__, $id) !== false) {
@@ -61,7 +70,7 @@ class EventBuild extends CacheBuild
     {
         $key = 'before' . ucfirst($name);
         if (isset($this->events[$key])) {
-            return $this->events[$key]($arg);
+            return $this->events[$key]($this, $arg);
         } else {
             return true;
         }
